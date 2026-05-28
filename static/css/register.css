@@ -1,0 +1,577 @@
+/* ============================================
+   AI Career Readiness Platform - Register Page
+   Matches login page design for consistency
+   ============================================ */
+
+:root {
+  --primary-blue: #2563eb;
+  --primary-dark: #1d4ed8;
+  --primary-light: #3b82f6;
+  --success-green: #16a34a;
+  --success-dark: #15803d;
+  --danger-red: #dc2626;
+  --warning-orange: #f59e0b;
+  --white: #ffffff;
+  --off-white: #f8fafc;
+  --light-gray: #e2e8f0;
+  --text-dark: #1e293b;
+  --text-muted: #64748b;
+  --shadow-sm: 0 4px 12px rgba(37, 99, 235, 0.1);
+  --shadow-md: 0 12px 30px rgba(37, 99, 235, 0.15);
+  --transition: all 0.3s ease;
+  --font-main: "Poppins", sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-main);
+  color: var(--text-dark);
+  background-color: var(--off-white);
+  min-height: 100vh;
+}
+
+/* Page fade-in animation on load */
+.page-fade-in {
+  opacity: 0;
+  animation: pageFadeIn 0.7s ease forwards;
+}
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   NAVBAR
+   ============================================ */
+.register-navbar {
+  background-color: var(--white);
+  box-shadow: var(--shadow-sm);
+  padding: 0.85rem 0;
+}
+
+.register-navbar .navbar-brand {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--primary-blue) !important;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.register-navbar .navbar-brand:hover {
+  color: var(--primary-dark) !important;
+}
+
+/* ============================================
+   SPLIT LAYOUT
+   ============================================ */
+.register-page-wrapper {
+  min-height: calc(100vh - 70px);
+  display: flex;
+  align-items: stretch;
+}
+
+/* Left motivational panel */
+.register-left-panel {
+  flex: 1;
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 45%, #0d9488 100%);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.register-left-panel::before {
+  content: "";
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  top: -60px;
+  right: -60px;
+}
+
+.register-left-panel::after {
+  content: "";
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  bottom: -40px;
+  left: -40px;
+}
+
+.left-panel-content {
+  position: relative;
+  z-index: 1;
+  max-width: 420px;
+  animation: slideInLeft 0.8s ease 0.2s both;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.left-panel-heading {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  line-height: 1.3;
+}
+
+.benefit-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.benefit-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  opacity: 0.95;
+}
+
+.benefit-list li i {
+  color: #86efac;
+  font-size: 1.1rem;
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+/* Right form panel */
+.register-right-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  background-color: var(--off-white);
+}
+
+/* ============================================
+   REGISTER CARD
+   ============================================ */
+.register-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 2.25rem 2rem;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--light-gray);
+  animation: cardSlideUp 0.7s ease 0.15s both;
+  transition: var(--transition);
+}
+
+@keyframes cardSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.register-card.register-success {
+  border-color: var(--success-green);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2), var(--shadow-md);
+}
+
+.register-card-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, var(--primary-blue), var(--primary-light));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  color: var(--white);
+  font-size: 1.75rem;
+}
+
+.register-card-heading {
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 0.35rem;
+}
+
+.register-card-subheading {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ============================================
+   FORM INPUTS
+   ============================================ */
+.form-group-custom {
+  margin-bottom: 1rem;
+}
+
+.form-group-custom label {
+  font-size: 0.88rem;
+  font-weight: 500;
+  margin-bottom: 0.35rem;
+  display: block;
+  color: var(--text-dark);
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.form-control-custom,
+.form-select-custom {
+  width: 100%;
+  padding: 0.7rem 2.75rem 0.7rem 2.5rem;
+  border: 2px solid var(--light-gray);
+  border-radius: 10px;
+  font-size: 0.92rem;
+  font-family: var(--font-main);
+  transition: var(--transition);
+  background-color: var(--white);
+  color: var(--text-dark);
+}
+
+/* Dropdown without right icon padding */
+.form-select-custom {
+  padding-right: 2rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+
+.form-control-custom:focus,
+.form-select-custom:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* Red border for validation errors */
+.form-control-custom.input-error,
+.form-select-custom.input-error {
+  border-color: var(--danger-red);
+}
+
+.form-control-custom.input-error:focus,
+.form-select-custom.input-error:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+/* Green border when field is valid */
+.form-control-custom.input-valid,
+.form-select-custom.input-valid {
+  border-color: var(--success-green);
+}
+
+/* Inline field hint (real-time validation) */
+.field-hint {
+  font-size: 0.78rem;
+  margin-top: 0.3rem;
+  display: none;
+}
+
+.field-hint.show {
+  display: block;
+}
+
+.field-hint.error {
+  color: var(--danger-red);
+}
+
+.field-hint.success {
+  color: var(--success-green);
+}
+
+/* Password show/hide toggle */
+.toggle-password {
+  position: absolute;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  z-index: 2;
+  transition: var(--transition);
+}
+
+.toggle-password:hover {
+  color: var(--primary-blue);
+}
+
+/* ============================================
+   PASSWORD STRENGTH BAR
+   ============================================ */
+.password-strength-wrapper {
+  margin-top: 0.5rem;
+}
+
+.strength-bar-track {
+  height: 6px;
+  background-color: var(--light-gray);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.strength-bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 4px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+/* Weak = red, Medium = orange, Strong = green */
+.strength-bar-fill.weak {
+  width: 33%;
+  background-color: var(--danger-red);
+}
+
+.strength-bar-fill.medium {
+  width: 66%;
+  background-color: var(--warning-orange);
+}
+
+.strength-bar-fill.strong {
+  width: 100%;
+  background-color: var(--success-green);
+}
+
+.strength-label {
+  font-size: 0.78rem;
+  margin-top: 0.35rem;
+  color: var(--text-muted);
+}
+
+.strength-label.weak {
+  color: var(--danger-red);
+}
+
+.strength-label.medium {
+  color: var(--warning-orange);
+}
+
+.strength-label.strong {
+  color: var(--success-green);
+}
+
+/* ============================================
+   TERMS CHECKBOX
+   ============================================ */
+.terms-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 1rem 0 1.25rem;
+}
+
+.terms-group input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 0.15rem;
+  accent-color: var(--primary-blue);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.terms-group label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-bottom: 0;
+  line-height: 1.4;
+}
+
+.terms-group.terms-error label {
+  color: var(--danger-red);
+}
+
+/* ============================================
+   REGISTER BUTTON (primary blue)
+   ============================================ */
+.btn-register {
+  width: 100%;
+  padding: 0.85rem;
+  background-color: var(--primary-blue);
+  color: var(--white);
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: var(--font-main);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-register:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+}
+
+.btn-register:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Login link at bottom */
+.login-link-text {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 1.25rem;
+  margin-bottom: 0;
+}
+
+.login-link-text a {
+  color: var(--primary-blue);
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.login-link-text a:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+/* ============================================
+   ERROR & SUCCESS MESSAGES
+   ============================================ */
+.error-message-box {
+  display: none;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: var(--danger-red);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.error-message-box.show {
+  display: block;
+  animation: shakeError 0.4s ease;
+}
+
+@keyframes shakeError {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}
+
+.success-overlay {
+  display: none;
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+.success-overlay.show {
+  display: block;
+  animation: successPop 0.5s ease;
+}
+
+@keyframes successPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  70% {
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.success-overlay i {
+  font-size: 3rem;
+  color: var(--success-green);
+  margin-bottom: 0.75rem;
+}
+
+.success-overlay p {
+  font-weight: 600;
+  color: var(--success-green);
+  margin: 0;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 991px) {
+  .register-left-panel {
+    display: none;
+  }
+
+  .register-right-panel {
+    flex: 1;
+    width: 100%;
+    min-height: calc(100vh - 70px);
+  }
+}
+
+@media (max-width: 575px) {
+  .register-card {
+    padding: 1.75rem 1.25rem;
+    border-radius: 12px;
+  }
+
+  .register-card-heading {
+    font-size: 1.35rem;
+  }
+}

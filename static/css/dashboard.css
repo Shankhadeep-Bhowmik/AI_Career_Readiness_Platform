@@ -1,0 +1,702 @@
+/* ============================================
+   AI Career Readiness Platform - Dashboard
+   Sidebar layout with responsive design
+   ============================================ */
+
+:root {
+  --primary-blue: #2563eb;
+  --primary-dark: #1d4ed8;
+  --primary-light: #3b82f6;
+  --sidebar-bg: #1e293b;
+  --sidebar-hover: #334155;
+  --sidebar-active: #2563eb;
+  --success-green: #16a34a;
+  --warning-orange: #f59e0b;
+  --danger-red: #ef4444;
+  --purple: #7c3aed;
+  --teal: #0d9488;
+  --white: #eee7e7;
+  --off-white: #f1f5f9;
+  --light-gray: #e2e8f0;
+  --text-dark: #303c52a8;
+  --text-muted: #64748b;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.1);
+  --transition: all 0.3s ease;
+  --font-main: "Poppins", sans-serif;
+  --sidebar-width: 260px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: var(--off-white);
+  color: var(--text-dark);
+  min-height: 100vh;
+}
+
+/* ============================================
+   SIDEBAR - Fixed left navigation
+   ============================================ */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background-color: var(--sidebar-bg);
+  color: var(--white);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.6s ease;
+  overflow-y: auto;
+}
+
+.sidebar-logo {
+  padding: 1.25rem 1.5rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border-bottom: 1px solid rgba(73, 56, 56, 0.452);
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--white);
+}
+
+.sidebar-logo i {
+  color: var(--primary-light);
+}
+
+/* Student profile in sidebar */
+.sidebar-profile {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-avatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-blue), var(--teal));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.profile-info h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+
+.profile-info p {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin: 0;
+}
+
+/* Navigation menu links */
+.sidebar-nav {
+  list-style: none;
+  padding: 1rem 0;
+  flex: 1;
+}
+
+.sidebar-nav li a {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.5rem;
+  color: rgba(233, 229, 229, 0.85);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.sidebar-nav li a:hover {
+  background-color: var(--sidebar-hover);
+  color: var(--white);
+}
+
+.sidebar-nav li a.active {
+  background-color: var(--sidebar-active);
+  color: var(--white);
+  border-left: 4px solid var(--primary-light);
+}
+
+.sidebar-nav li a i {
+  width: 20px;
+  text-align: center;
+}
+
+.sidebar-nav li a.logout-link:hover {
+  background-color: rgba(219, 45, 45, 0.356);
+  color: #fca5a5;
+}
+
+/* Sidebar overlay for mobile */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.sidebar-overlay.show {
+  display: block;
+}
+
+/* ============================================
+   MAIN CONTENT AREA
+   ============================================ */
+.main-wrapper {
+  margin-left: var(--sidebar-width);
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+
+/* Top header bar */
+.top-header {
+  background: rgba(209, 206, 207, 0.911);
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.35rem;
+  color: var(--text-dark);
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.page-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-student-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+/* .notification-btn {
+  position: relative;
+  background: var(--off-white);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--text-dark);
+  font-size: 1.1rem;
+  transition: var(--transition);
+} */
+
+/* .notification-btn:hover {
+  background: var(--light-gray);
+  color: var(--primary-blue);
+} */
+
+/* .notification-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  background: var(--danger-red);
+  border-radius: 50%;
+  border: 2px solid var(--white);
+} */
+
+/* Dashboard content padding */
+.dashboard-content {
+  padding: 1.6rem;
+}
+
+/* ============================================
+   WELCOME BANNER
+   ============================================ */
+.welcome-banner {
+  background: linear-gradient(139deg, var(--primary-blue), var(--primary-dark));
+  border-radius: 16px;
+  padding: 1.75rem 2rem;
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+.welcome-text h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.welcome-text p {
+  opacity: 0.9;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Circular chart container for career score */
+.score-chart-wrapper {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  flex-shrink: 0;
+}
+
+.score-chart-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.score-chart-center .score-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.score-chart-center .score-label {
+  font-size: 0.7rem;
+  opacity: 0.85;
+}
+
+/* ============================================
+   STATS CARDS ROW
+   ============================================ */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--light-gray);
+  transition: var(--transition);
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  color: var(--white);
+  flex-shrink: 0;
+}
+
+/* Different accent colors for each stat card */
+.stat-card.skills .stat-icon {
+  background: linear-gradient(135deg, var(--primary-blue), var(--primary-light));
+}
+
+.stat-card.roadmap .stat-icon {
+  background: linear-gradient(135deg, var(--success-green), #22c55e);
+}
+
+.stat-card.interviews .stat-icon {
+  background: linear-gradient(135deg, var(--purple), #a78bfa);
+}
+
+.stat-card.days .stat-icon {
+  background: linear-gradient(135deg, var(--warning-orange), #fbbf24);
+}
+
+.stat-info h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.15rem;
+}
+
+.stat-info p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ============================================
+   SECTION CARDS (Skill overview, Activity)
+   ============================================ */
+.section-card {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--light-gray);
+  margin-bottom: 1.5rem;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.section-header h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.btn-update-skills {
+  background: var(--primary-blue);
+  color: var(--white);
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-main);
+}
+
+.btn-update-skills:hover {
+  background: var(--primary-dark);
+  color: var(--white);
+  transform: translateY(-4px);
+}
+
+/* Chart container for skills bar chart */
+.chart-container {
+  position: relative;
+  height: 290px;
+  width: 100%;
+}
+
+/* ============================================
+   RECENT ACTIVITY LIST
+   ============================================ */
+.activity-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--light-gray);
+  transition: var(--transition);
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.activity-item:first-child {
+  padding-top: 0;
+}
+
+.activity-item:hover {
+  background-color: var(--off-white);
+  margin: 0 -0.5rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  border-radius: 8px;
+}
+
+.activity-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: var(--off-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-blue);
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.activity-content {
+  flex: 1;
+}
+
+.activity-content p {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0.2rem;
+}
+
+.activity-content span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ============================================
+   QUICK ACCESS CARDS
+   ============================================ */
+.quick-access-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+}
+
+.quick-card {
+  border-radius: 12px;
+  padding: 1.5rem;
+  color: var(--white);
+  text-decoration: none;
+  transition: var(--transition);
+  display: block;
+  min-height: 140px;
+}
+
+.quick-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-md);
+  color: var(--white);
+}
+
+.quick-card i {
+  font-size: 1.75rem;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.quick-card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.quick-card p {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Color coded quick access cards */
+.quick-card.interview {
+  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+}
+
+.quick-card.roadmap {
+  background: linear-gradient(135deg, var(--primary-blue), var(--primary-light));
+}
+
+.quick-card.resume {
+  background: linear-gradient(135deg, var(--teal), #14b8a6);
+}
+
+.quick-card.news {
+  background: linear-gradient(135deg, var(--warning-orange), #fbbf24);
+}
+
+/* Two column layout for middle sections */
+.dashboard-grid-2 {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 1rem;
+}
+
+/* ============================================
+   MOBILE BOTTOM NAVIGATION
+   ============================================ */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--white);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  padding: 0.5rem 0;
+  justify-content: space-around;
+}
+
+.bottom-nav a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.65rem;
+  padding: 0.35rem 0.5rem;
+  transition: var(--transition);
+}
+
+.bottom-nav a i {
+  font-size: 1.10rem;
+}
+
+.bottom-nav a.active,
+.bottom-nav a:hover {
+  color: var(--primary-blue);
+}
+
+/* Loading state */
+
+.dashboard-loading {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 1200px) {
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .quick-access-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 991px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .main-wrapper {
+    margin-left: 0;
+    padding-bottom: 70px;
+  }
+
+  .hamburger-btn {
+    display: block;
+  }
+
+  .header-student-name {
+    display: none;
+  }
+
+  .dashboard-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .bottom-nav {
+    display: flex;
+  }
+}
+
+@media (max-width: 575px) {
+  .dashboard-content {
+    padding: 1rem;
+  }
+
+  .welcome-banner {
+    padding: 1.25rem;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .welcome-text h2 {
+    font-size: 1.25rem;
+  }
+
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-access-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-title {
+    font-size: 1.15rem;
+  }
+}
+
+/* Mobile Responsive Fixes */
+@media (max-width: 768px) {
+  /* 1. Force the 2-column grid into 1 single vertical column */
+  .dashboard-grid-2 {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 0.4rem; /* Adds nice space between the stacked cards */
+  }
+
+  /* 2. Make sure the individual cards never exceed the screen width */
+  .section-card {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box; /* Ensures padding stays inside the card box */
+  }
+
+  /* 3. Help the chart adjust its width inside the container */
+  .chart-container {
+    width: 100% !important;
+    max-width: 100%;
+  }
+}

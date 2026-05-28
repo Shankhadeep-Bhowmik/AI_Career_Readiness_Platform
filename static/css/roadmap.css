@@ -1,0 +1,560 @@
+/* ============================================
+   AI Career Readiness Platform - Learning Roadmap
+   Vertical timeline and progress styling
+   ============================================ */
+
+:root {
+  --primary-blue: #2563eb;
+  --primary-dark: #1d4ed8;
+  --primary-light: #3b82f6;
+  --success-green: #16a34a;
+  --success-light: #dcfce7;
+  --warning-orange: #f59e0b;
+  --gray-upcoming: #94a3b8;
+  --gray-bg: #f1f5f9;
+  --white: #ffffff;
+  --light-gray: #e2e8f0;
+  --text-dark: #1e293b;
+  --text-muted: #64748b;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.1);
+  --transition: all 0.3s ease;
+}
+
+/* ============================================
+   PAGE HEADER
+   ============================================ */
+.roadmap-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.roadmap-page-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.roadmap-page-header p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin: 0;
+  max-width: 520px;
+}
+
+.completion-badge {
+  background: linear-gradient(135deg, var(--primary-blue), var(--primary-dark));
+  color: var(--white);
+  padding: 0.6rem 1.25rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ============================================
+   LAYOUT GRID - Timeline + Progress sidebar
+   ============================================ */
+.roadmap-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* ============================================
+   PROGRESS OVERVIEW CARD
+   ============================================ */
+.progress-overview-card {
+  background: var(--white);
+  border-radius: 12px;
+  border: 1px solid var(--light-gray);
+  box-shadow: var(--shadow-sm);
+  padding: 1.5rem;
+  position: sticky;
+  top: 90px;
+}
+
+.progress-overview-card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+  text-align: center;
+}
+
+.roadmap-progress-chart-wrap {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  margin: 0 auto 1.25rem;
+}
+
+.roadmap-progress-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.roadmap-progress-center .percent {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--primary-blue);
+  line-height: 1;
+}
+
+.roadmap-progress-center .label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.progress-stats-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.progress-stats-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--light-gray);
+  font-size: 0.88rem;
+}
+
+.progress-stats-list li:last-child {
+  border-bottom: none;
+}
+
+.progress-stats-list li span:last-child {
+  font-weight: 600;
+  color: var(--primary-blue);
+}
+
+/* Regenerate button */
+.btn-regenerate {
+  width: 100%;
+  margin-top: 1.25rem;
+  padding: 0.75rem 1rem;
+  background: var(--white);
+  color: var(--primary-blue);
+  border: 2px solid var(--primary-blue);
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: inherit;
+}
+
+.btn-regenerate:hover:not(:disabled) {
+  background: var(--primary-blue);
+  color: var(--white);
+}
+
+.btn-regenerate:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   VERTICAL TIMELINE
+   ============================================ */
+.roadmap-timeline {
+  position: relative;
+  padding-left: 0;
+}
+
+/* Vertical line connecting steps */
+.roadmap-timeline::before {
+  content: "";
+  position: absolute;
+  left: 23px;
+  top: 24px;
+  bottom: 24px;
+  width: 3px;
+  background: var(--light-gray);
+  z-index: 0;
+}
+
+.timeline-step {
+  display: flex;
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
+  position: relative;
+  z-index: 1;
+}
+
+.timeline-step:last-child {
+  margin-bottom: 0;
+}
+
+/* Step number circle on left */
+.step-circle {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  background: var(--gray-bg);
+  color: var(--gray-upcoming);
+  border: 3px solid var(--light-gray);
+  transition: var(--transition);
+  z-index: 2;
+}
+
+/* Completed step - green */
+.timeline-step.completed .step-circle {
+  background: var(--success-green);
+  color: var(--white);
+  border-color: var(--success-green);
+}
+
+.timeline-step.completed .step-card {
+  border-color: var(--success-green);
+  background: var(--success-light);
+}
+
+/* Current step - blue with pulse */
+.timeline-step.current .step-circle {
+  background: var(--primary-blue);
+  color: var(--white);
+  border-color: var(--primary-blue);
+  animation: pulseCircle 2s ease infinite;
+}
+
+.timeline-step.current .step-card {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2), var(--shadow-md);
+}
+
+@keyframes pulseCircle {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(37, 99, 235, 0);
+  }
+}
+
+/* Upcoming step - gray */
+.timeline-step.upcoming .step-circle {
+  background: var(--gray-bg);
+  color: var(--gray-upcoming);
+}
+
+.timeline-step.upcoming .step-card {
+  opacity: 0.85;
+  background: var(--gray-bg);
+}
+
+/* Step card on right */
+.step-card {
+  flex: 1;
+  background: var(--white);
+  border-radius: 12px;
+  border: 1px solid var(--light-gray);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.step-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.step-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.step-topic {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.step-topic-icon {
+  width: 42px;
+  height: 42px;
+  background: var(--off-white, #f8fafc);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-blue);
+  font-size: 1.1rem;
+}
+
+.step-topic h4 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.step-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.difficulty-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.difficulty-badge.beginner {
+  background: #dbeafe;
+  color: var(--primary-blue);
+}
+
+.difficulty-badge.intermediate {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.difficulty-badge.advanced {
+  background: #fce7f3;
+  color: #be185d;
+}
+
+.time-estimate {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.time-estimate i {
+  margin-right: 0.25rem;
+}
+
+.step-description {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+/* Resources section */
+.resources-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--light-gray);
+}
+
+.resources-section h5 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: var(--text-dark);
+}
+
+.resources-section h5 i {
+  margin-right: 0.35rem;
+  color: var(--danger-red, #ef4444);
+}
+
+/* YouTube thumbnails grid */
+.youtube-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.youtube-card {
+  text-decoration: none;
+  color: inherit;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--light-gray);
+  transition: var(--transition);
+  background: var(--white);
+}
+
+.youtube-card:hover {
+  transform: scale(1.03);
+  box-shadow: var(--shadow-sm);
+  color: inherit;
+}
+
+.youtube-thumb {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  display: block;
+  background: var(--gray-bg);
+}
+
+.youtube-card-title {
+  font-size: 0.72rem;
+  padding: 0.4rem 0.5rem;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Article and exercise links */
+.resource-links {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem;
+}
+
+.resource-links li {
+  margin-bottom: 0.4rem;
+}
+
+.resource-links a {
+  font-size: 0.85rem;
+  color: var(--primary-blue);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.resource-links a:hover {
+  text-decoration: underline;
+}
+
+.exercise-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.exercise-list li {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  padding: 0.35rem 0;
+  padding-left: 1.25rem;
+  position: relative;
+}
+
+.exercise-list li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--success-green);
+  font-weight: 700;
+}
+
+/* Mark complete checkbox */
+.mark-complete-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--light-gray);
+}
+
+.mark-complete-wrap input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--success-green);
+  cursor: pointer;
+}
+
+.mark-complete-wrap label {
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin: 0;
+}
+
+.timeline-step.completed .mark-complete-wrap label {
+  color: var(--success-green);
+}
+
+/* Loading state */
+.roadmap-loading {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
+}
+
+/* Mobile regenerate below timeline */
+.mobile-regenerate-wrap {
+  display: none;
+  margin-top: 1.5rem;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 991px) {
+  .roadmap-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .progress-overview-card {
+    position: static;
+    order: -1;
+  }
+
+  .progress-overview-card .btn-regenerate {
+    display: none;
+  }
+
+  .mobile-regenerate-wrap {
+    display: block;
+  }
+
+  .progress-overview-card .roadmap-progress-chart-wrap {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+@media (max-width: 575px) {
+  .roadmap-timeline::before {
+    left: 19px;
+  }
+
+  .step-circle {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    font-size: 0.9rem;
+  }
+
+  .timeline-step {
+    gap: 0.75rem;
+  }
+
+  .step-card {
+    padding: 1rem;
+  }
+
+  .youtube-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

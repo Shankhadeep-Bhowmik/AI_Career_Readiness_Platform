@@ -1,0 +1,495 @@
+/* ============================================
+   AI Career Readiness Platform - Login Page
+   Colors and spacing use CSS variables
+   ============================================ */
+
+:root {
+  --primary-blue: #2563eb;
+  --primary-dark: #1d4ed8;
+  --primary-light: #3b82f6;
+  --success-green: #16a34a;
+  --success-dark: #15803d;
+  --danger-red: #dc2626;
+  --white: #ffffff;
+  --off-white: #f8fafc;
+  --light-gray: #e2e8f0;
+  --text-dark: #1e293b;
+  --text-muted: #64748b;
+  --shadow-sm: 0 4px 12px rgba(37, 99, 235, 0.1);
+  --shadow-md: 0 12px 30px rgba(37, 99, 235, 0.15);
+  --transition: all 0.3s ease;
+  --font-main: "Poppins", sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-main);
+  color: var(--text-dark);
+  background-color: var(--off-white);
+  min-height: 100vh;
+}
+
+/* Page fade-in on load */
+.page-fade-in {
+  opacity: 0;
+  animation: pageFadeIn 0.7s ease forwards;
+}
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   NAVBAR
+   ============================================ */
+.login-navbar {
+  background-color: var(--white);
+  box-shadow: var(--shadow-sm);
+  padding: 0.85rem 0;
+}
+
+.login-navbar .navbar-brand {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--primary-blue) !important;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.login-navbar .navbar-brand:hover {
+  color: var(--primary-dark) !important;
+}
+
+/* ============================================
+   SPLIT LAYOUT - Left panel + right form
+   ============================================ */
+.login-page-wrapper {
+  min-height: calc(100vh - 70px);
+  display: flex;
+  align-items: stretch;
+}
+
+/* Left motivational panel (desktop only) */
+.login-left-panel {
+  flex: 1;
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 45%, #0d9488 100%);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative shapes on left panel */
+.login-left-panel::before {
+  content: "";
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  top: -60px;
+  right: -60px;
+}
+
+.login-left-panel::after {
+  content: "";
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  bottom: -40px;
+  left: -40px;
+}
+
+.left-panel-content {
+  position: relative;
+  z-index: 1;
+  max-width: 420px;
+  animation: slideInLeft 0.8s ease 0.2s both;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.left-panel-heading {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  line-height: 1.3;
+}
+
+.benefit-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.benefit-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  opacity: 0.95;
+}
+
+.benefit-list li i {
+  color: #86efac;
+  font-size: 1.1rem;
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+/* Right side - form area */
+.login-right-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  background-color: var(--off-white);
+}
+
+/* ============================================
+   LOGIN CARD
+   ============================================ */
+.login-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--light-gray);
+  animation: cardSlideUp 0.7s ease 0.15s both;
+  transition: var(--transition);
+}
+
+@keyframes cardSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Success state after login */
+.login-card.login-success {
+  border-color: var(--success-green);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2), var(--shadow-md);
+}
+
+.login-card-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, var(--primary-blue), var(--primary-light));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  color: var(--white);
+  font-size: 1.75rem;
+}
+
+.login-card-heading {
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 0.35rem;
+}
+
+.login-card-subheading {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 1.75rem;
+}
+
+/* ============================================
+   FORM INPUTS
+   ============================================ */
+.form-group-custom {
+  margin-bottom: 1.25rem;
+}
+
+.form-group-custom label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+  display: block;
+  color: var(--text-dark);
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.form-control-custom {
+  width: 100%;
+  padding: 0.75rem 2.75rem 0.75rem 2.5rem;
+  border: 2px solid var(--light-gray);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-family: var(--font-main);
+  transition: var(--transition);
+  background-color: var(--white);
+}
+
+.form-control-custom:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.form-control-custom.input-error {
+  border-color: var(--danger-red);
+}
+
+.form-control-custom.input-error:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+/* Password show/hide toggle */
+.toggle-password {
+  position: absolute;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  z-index: 2;
+  transition: var(--transition);
+}
+
+.toggle-password:hover {
+  color: var(--primary-blue);
+}
+
+/* ============================================
+   LOGIN BUTTON
+   ============================================ */
+.btn-login {
+  width: 100%;
+  padding: 0.85rem;
+  background-color: var(--success-green);
+  color: var(--white);
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: var(--font-main);
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: 0.5rem;
+}
+
+.btn-login:hover {
+  background-color: var(--success-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(22, 163, 74, 0.35);
+}
+
+.btn-login:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Divider with OR text */
+.divider-or {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.divider-or::before,
+.divider-or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background-color: var(--light-gray);
+}
+
+.divider-or span {
+  padding: 0 1rem;
+  font-weight: 500;
+}
+
+/* Register link at bottom */
+.register-link-text {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 0;
+}
+
+.register-link-text a {
+  color: var(--primary-blue);
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.register-link-text a:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+/* ============================================
+   ERROR & SUCCESS MESSAGES
+   ============================================ */
+/* Green success message (e.g. after registration) */
+.success-message-box {
+  display: none;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: var(--success-green);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.success-message-box.show {
+  display: block;
+  animation: successPop 0.5s ease;
+}
+
+.error-message-box {
+  display: none;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: var(--danger-red);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.error-message-box.show {
+  display: block;
+  animation: shakeError 0.4s ease;
+}
+
+@keyframes shakeError {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}
+
+.success-overlay {
+  display: none;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.success-overlay.show {
+  display: block;
+  animation: successPop 0.5s ease;
+}
+
+@keyframes successPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  70% {
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.success-overlay i {
+  font-size: 3rem;
+  color: var(--success-green);
+  margin-bottom: 0.75rem;
+}
+
+.success-overlay p {
+  font-weight: 600;
+  color: var(--success-green);
+  margin: 0;
+}
+
+/* ============================================
+   RESPONSIVE - Hide left panel on mobile
+   ============================================ */
+@media (max-width: 991px) {
+  .login-left-panel {
+    display: none;
+  }
+
+  .login-right-panel {
+    flex: 1;
+    width: 100%;
+    min-height: calc(100vh - 70px);
+  }
+
+  .login-card {
+    padding: 2rem 1.5rem;
+  }
+}
+
+@media (max-width: 575px) {
+  .login-card-heading {
+    font-size: 1.4rem;
+  }
+
+  .login-card {
+    padding: 1.75rem 1.25rem;
+    border-radius: 12px;
+  }
+}

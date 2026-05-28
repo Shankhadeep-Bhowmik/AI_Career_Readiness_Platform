@@ -1,0 +1,507 @@
+/* ============================================
+   AI Career Readiness Platform - Skill Assessment
+   Works with dashboard.css for sidebar layout
+   ============================================ */
+
+:root {
+  --primary-blue: #2563eb;
+  --primary-dark: #1d4ed8;
+  --success-green: #16a34a;
+  --warning-orange: #f59e0b;
+  --danger-red: #ef4444;
+  --white: #ffffff;
+  --off-white: #f1f5f9;
+  --light-gray: #e2e8f0;
+  --text-dark: #1e293b;
+  --text-muted: #64748b;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.1);
+  --transition: all 0.3s ease;
+}
+
+/* ============================================
+   PAGE HEADER
+   ============================================ */
+.skill-page-header {
+  margin-bottom: 1.5rem;
+}
+
+.skill-page-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.skill-page-header p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+/* Assessment completion progress bar */
+.assessment-progress-wrapper {
+  background: var(--white);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--light-gray);
+  box-shadow: var(--shadow-sm);
+}
+
+.assessment-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.assessment-progress-bar {
+  height: 10px;
+  background: var(--light-gray);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.assessment-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--primary-blue), #3b82f6);
+  border-radius: 6px;
+  transition: width 0.4s ease;
+}
+
+/* ============================================
+   SKILL TABS
+   ============================================ */
+.skill-tabs-card {
+  background: var(--white);
+  border-radius: 12px;
+  border: 1px solid var(--light-gray);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.skill-nav-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--light-gray);
+  background: var(--off-white);
+  padding: 0.5rem 0.5rem 0;
+  flex-wrap: wrap;
+}
+
+.skill-nav-tabs .nav-link {
+  border: none;
+  border-radius: 8px 8px 0 0;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 0.75rem 1.25rem;
+  transition: var(--transition);
+  background: transparent;
+}
+
+.skill-nav-tabs .nav-link:hover {
+  color: var(--primary-blue);
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.skill-nav-tabs .nav-link.active {
+  background: var(--white);
+  color: var(--primary-blue);
+  font-weight: 600;
+  border-bottom: 2px solid var(--primary-blue);
+}
+
+.skill-tab-content {
+  padding: 1.5rem;
+}
+
+/* ============================================
+   SKILL SLIDERS
+   ============================================ */
+.skill-slider-item {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--off-white);
+}
+
+.skill-slider-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.skill-slider-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.skill-slider-header i {
+  width: 36px;
+  height: 36px;
+  background: var(--off-white);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-blue);
+  font-size: 1rem;
+}
+
+.skill-slider-header .skill-name {
+  flex: 1;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.skill-value-badge {
+  min-width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--white);
+  transition: background-color 0.3s ease;
+}
+
+/* Slider value colors: red 1-3, orange 4-6, green 7-10 */
+.skill-value-badge.level-low,
+.skill-range.level-low::-webkit-slider-thumb {
+  background-color: var(--danger-red);
+}
+
+.skill-value-badge.level-medium,
+.skill-range.level-medium::-webkit-slider-thumb {
+  background-color: var(--warning-orange);
+}
+
+.skill-value-badge.level-high,
+.skill-range.level-high::-webkit-slider-thumb {
+  background-color: var(--success-green);
+}
+
+/* Custom range slider styling */
+.skill-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--light-gray);
+  outline: none;
+  transition: var(--transition);
+}
+
+.skill-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--primary-blue);
+  cursor: pointer;
+  border: 3px solid var(--white);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease;
+}
+
+.skill-range::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--primary-blue);
+  cursor: pointer;
+  border: 3px solid var(--white);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.skill-range.level-low {
+  background: linear-gradient(to right, var(--danger-red) 0%, var(--light-gray) 0%);
+}
+
+.skill-range.level-medium {
+  background: linear-gradient(to right, var(--warning-orange) 0%, var(--light-gray) 0%);
+}
+
+.skill-range.level-high {
+  background: linear-gradient(to right, var(--success-green) 0%, var(--light-gray) 0%);
+}
+
+/* ============================================
+   DOMAIN KNOWLEDGE FORM FIELDS
+   ============================================ */
+.domain-form-group {
+  margin-bottom: 1.25rem;
+}
+
+.domain-form-group label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.domain-form-group .form-control,
+.domain-form-group .form-select {
+  border: 2px solid var(--light-gray);
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  font-size: 0.92rem;
+  transition: var(--transition);
+}
+
+.domain-form-group .form-control:focus,
+.domain-form-group .form-select:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* ============================================
+   SUBMIT BUTTON
+   ============================================ */
+.btn-analyze-skills {
+  width: 100%;
+  padding: 0.9rem;
+  background: var(--primary-blue);
+  color: var(--white);
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-analyze-skills:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+}
+
+.btn-analyze-skills:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   AI RESULTS SECTION
+   ============================================ */
+.results-section {
+  display: none;
+  margin-top: 1.5rem;
+  animation: slideInResults 0.6s ease forwards;
+}
+
+.results-section.show {
+  display: block;
+}
+
+@keyframes slideInResults {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.results-card {
+  background: var(--white);
+  border-radius: 12px;
+  border: 1px solid var(--light-gray);
+  box-shadow: var(--shadow-md);
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.results-card h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+/* Loading spinner */
+.ai-loading {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.ai-loading .spinner-border {
+  width: 3rem;
+  height: 3rem;
+  color: var(--primary-blue);
+  margin-bottom: 1rem;
+}
+
+.ai-loading p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* Career readiness score badge */
+.readiness-score-box {
+  text-align: center;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, var(--primary-blue), var(--primary-dark));
+  border-radius: 12px;
+  color: var(--white);
+  margin-bottom: 1.25rem;
+}
+
+.readiness-score-box .score-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.readiness-score-box .score-text {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin-top: 0.35rem;
+}
+
+/* Radar chart container */
+.radar-chart-container {
+  position: relative;
+  height: 320px;
+  width: 100%;
+}
+
+/* Skill gap list */
+.gap-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.gap-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 0.75rem;
+  border-left: 4px solid;
+  background: var(--off-white);
+  transition: var(--transition);
+}
+
+.gap-item:hover {
+  transform: translateX(4px);
+}
+
+/* Priority color coding */
+.gap-item.priority-high {
+  border-left-color: var(--danger-red);
+  background: #fef2f2;
+}
+
+.gap-item.priority-medium {
+  border-left-color: var(--warning-orange);
+  background: #fffbeb;
+}
+
+.gap-item.priority-low {
+  border-left-color: var(--success-green);
+  background: #f0fdf4;
+}
+
+.gap-priority-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.gap-item.priority-high .gap-priority-badge {
+  background: var(--danger-red);
+  color: var(--white);
+}
+
+.gap-item.priority-medium .gap-priority-badge {
+  background: var(--warning-orange);
+  color: var(--white);
+}
+
+.gap-item.priority-low .gap-priority-badge {
+  background: var(--success-green);
+  color: var(--white);
+}
+
+.gap-content h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.gap-content p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Redirect to roadmap button */
+.btn-go-roadmap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--success-green);
+  color: var(--white);
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.btn-go-roadmap:hover {
+  background: #15803d;
+  color: var(--white);
+  transform: translateY(-2px);
+}
+
+.results-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+/* Hide assessment form when showing loading in place - optional */
+.assessment-form-hidden {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Responsive */
+@media (max-width: 575px) {
+  .skill-nav-tabs .nav-link {
+    font-size: 0.8rem;
+    padding: 0.6rem 0.75rem;
+  }
+
+  .skill-tab-content {
+    padding: 1rem;
+  }
+
+  .radar-chart-container {
+    height: 260px;
+  }
+}
