@@ -29,7 +29,7 @@
   />
 
   <!-- Custom Landing Page Styles -->
-  <link rel="stylesheet" href="../static/css/home.css" />
+  <link rel="stylesheet" href="/static/css/home.css" />
 
   <title>AI Career | Home</title>
   </head>
@@ -44,6 +44,7 @@
         <i class="fa-solid fa-graduation-cap me-2"></i>AI Career Readiness Platform
       </a>
 
+      <!-- Below is hamburger button for mobile width menu-->
       <button
         class="navbar-toggler"
         type="button"
@@ -65,10 +66,10 @@
             <a class="nav-link" href="#features">Features</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="login.html">Login</a>
+            <a class="nav-link" href="{{ url_for('login') }}">Login</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link btn-nav-register" href="register.html">Register</a>
+            <a class="nav-link btn-nav-register" href="{{ url_for('register') }}">Register</a>
           </li>
         </ul>
       </div>
@@ -90,7 +91,7 @@
             personalized learning roadmaps, and prepares you for real interviews
           </p>
           <div class="hero-buttons">
-            <a href="register.html" class="btn-hero-primary">Get Started Free</a>
+            <a href="{{ url_for('register') }}" class="btn-hero-primary">Get Started Free</a>
             <a href="#features" class="btn-hero-secondary">Learn More</a>
           </div>
         </div>

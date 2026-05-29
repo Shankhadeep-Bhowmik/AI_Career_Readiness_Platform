@@ -135,9 +135,9 @@
                   <i class="fa-solid fa-book input-icon"></i>
                   <select class="form-select-custom" id="course" name="course" required>
                     <option value="" selected disabled>Select your course</option>
-                    <option value="Computer Science">Computer Science</option>
+                    <option value="MCA">Master of Computer Applications</option>
                     <option value="Data Science">Data Science</option>
-                    <option value="MBA">MBA</option>
+                    <option value="BCA">Bachelor of Computer Applications</option>
                     <option value="Engineering">Engineering</option>
                     <option value="Arts">Arts</option>
                     <option value="Other">Other</option>
@@ -218,7 +218,7 @@
             <!-- Login link -->
             <p class="login-link-text">
               Already have an account?
-              <a href="/login">Login here</a>
+              <a href="{{ url_for('login') }}">Login here</a>
             </p>
           </div>
         </div>
