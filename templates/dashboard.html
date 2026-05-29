@@ -210,22 +210,22 @@
             <h2>Quick Access</h2>
           </div>
           <div class="quick-access-grid">
-            <a href="/interview" class="quick-card interview">
+            <a href="{{ url_for('interview') }}" class="quick-card interview">
               <i class="fa-solid fa-microphone"></i>
               <h3>Start Interview Practice</h3>
               <p>Practice with AI and improve your interview skills</p>
             </a>
-            <a href="/roadmap" class="quick-card roadmap">
+            <a href="{{ url_for('roadmap') }}" class="quick-card roadmap">
               <i class="fa-solid fa-map"></i>
               <h3>View My Roadmap</h3>
               <p>Follow your personalized learning path</p>
             </a>
-            <a href="/resume" class="quick-card resume">
+            <a href="{{ url_for('resume') }}" class="quick-card resume">
               <i class="fa-solid fa-file-lines"></i>
               <h3>Build Resume</h3>
               <p>Create a professional resume with AI feedback</p>
             </a>
-            <a href="/news" class="quick-card news">
+            <a href="{{ url_for('news') }}" class="quick-card news">
               <i class="fa-solid fa-newspaper"></i>
               <h3>Read Tech News</h3>
               <p>Stay updated with latest industry trends</p>
@@ -237,23 +237,23 @@
 
     <!-- Mobile bottom navigation -->
     <nav class="bottom-nav" aria-label="Mobile navigation">
-      <a href="/dashboard" class="active">
+      <a href="{{ url_for('dashboard') }}" class="active">
         <i class="fa-solid fa-house"></i>
         <span>Home</span>
       </a>
-      <a href="/skills">
+      <a href="{{ url_for('skills') }}">
         <i class="fa-solid fa-chart-bar"></i>
         <span>Skills</span>
       </a>
-      <a href="/roadmap">
+      <a href="{{ url_for('roadmap') }}">
         <i class="fa-solid fa-map"></i>
         <span>Roadmap</span>
       </a>
-      <a href="/interview">
+      <a href="{{ url_for('interview') }}">
         <i class="fa-solid fa-microphone"></i>
         <span>Interview</span>
       </a>
-      <a href="#" id="logoutBtnMobile">
+      <a href="{{ url_for('logout') }}" id="logoutBtnMobile">
         <i class="fa-solid fa-right-from-bracket"></i>
         <span>Logout</span>
       </a>

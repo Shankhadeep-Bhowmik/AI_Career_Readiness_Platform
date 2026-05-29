@@ -67,6 +67,8 @@ body {
   align-items: center;
   gap: 0.7rem;
   color: var(--white);
+  /* I want to remove underline from link */
+  text-decoration: none;
 }
 
 .sidebar-logo i {

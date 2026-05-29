@@ -295,6 +295,37 @@ def api_dashboard():
         'recentActivity': recent_activity
     })
 
+@app.route('/api/skills', methods=['POST'])
+def api_skills():
+  if not check_session():
+    return jsonify({
+      'success':False,
+      'message':'Not logged in'
+    }), 401
+  
+  data = request.get_json(silent=True) or {}
+  technical = data.get('technical', {})
+  soft = data.get('soft', {})
+  all_skills = {**technical, **soft}
+
+  if not all_skills:
+    return jsonify({'success': False, 'message': 'No skills provided'}), 400
+  
+  user_id = session['user_id']
+  cursor = mysql.connection.cursor()
+
+   # Save all skills to DB
+  for skill_name, level in all_skills.items():
+    cursor.execute('''
+            INSERT INTO skill(user_id, skill_name, current_level)
+            VALUES (%s, %s, %s)
+            ON DUPLICATE KEY UPDATE current_level = %s
+    ''', (user_id, skill_name, int(level), int(level)))
+
+  mysql.connection.commit()
+  cursor.close()
+
+  return jsonify({'success': False})
 
 
 # Skill assessment

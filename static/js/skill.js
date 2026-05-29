@@ -1,32 +1,30 @@
 /**
  * AI Career Readiness Platform - Skill Assessment JavaScript
- * Sliders, tabs, API submit, AI results and radar chart
+ * Dynamic skill form, API submit, AI results and radar chart
  */
 
 let radarChart = null;
+const userSkills = {};
 
 // Industry required levels for gap analysis (mock AI)
-const industryRequirements = {
-  "Python Programming": 9,
-  "Web Development HTML CSS": 8,
-  "Database SQL": 8,
-  "Data Structures": 8,
-  "Git and Version Control": 7,
-  Communication: 8,
-  Teamwork: 7,
-  "Problem Solving": 9,
-  "Time Management": 7,
-  Leadership: 6,
-};
+// const industryRequirements = {
+//   "Python Programming": 9,
+//   "Web Development HTML CSS": 8,
+//   "Database SQL": 8,
+//   "Data Structures": 8,
+//   "Git and Version Control": 7,
+//   Communication: 8,
+//   Teamwork: 7,
+//   "Problem Solving": 9,
+//   "Time Management": 7,
+//   Leadership: 6,
+// };
 
 document.addEventListener("DOMContentLoaded", function () {
   initSidebar();
   initLogout();
-  initSliders();
-  initTabs();
-  initDomainFields();
+  initSkillForm();
   initAnalyzeButton();
-  updateProgress();
 });
 
 /**
@@ -75,106 +73,93 @@ function initLogout() {
 }
 
 /**
- * Get color class based on slider value 1-10
+ * Dynamic skill form - add/remove skills
  */
-function getLevelClass(value) {
-  const num = parseInt(value, 10);
-  if (num <= 3) return "level-low";
-  if (num <= 6) return "level-medium";
-  return "level-high";
+function initSkillForm() {
+  const addSkillBtn = document.getElementById("addSkillBtn");
+  const addSkillForm = document.getElementById("addSkillForm");
+  const confirmAddBtn = document.getElementById("confirmAddBtn");
+
+  addSkillBtn.addEventListener("click", function () {
+    addSkillForm.style.display = addSkillForm.style.display === "none" ? "block" : "none";
+    document.getElementById("skillNameInput").focus();
+  });
+
+  confirmAddBtn.addEventListener("click", addSkill);
+
+  document.getElementById("skillNameInput").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") addSkill();
+  });
+  document.getElementById("skillLevelInput").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") addSkill();
+  });
 }
 
-/**
- * Update slider fill gradient and badge color
- */
-function updateSliderUI(rangeInput) {
-  const value = rangeInput.value;
-  const levelClass = getLevelClass(value);
-  const valueDisplay = document.getElementById("val-" + rangeInput.id);
+function addSkill() {
+  const nameInput = document.getElementById("skillNameInput");
+  const levelInput = document.getElementById("skillLevelInput");
+  const errorMsg = document.getElementById("skillInputError");
 
-  rangeInput.classList.remove("level-low", "level-medium", "level-high");
-  rangeInput.classList.add(levelClass);
+  const name = nameInput.value.trim();
+  const level = parseInt(levelInput.value, 10);
 
-  if (valueDisplay) {
-    valueDisplay.textContent = value;
-    valueDisplay.classList.remove("level-low", "level-medium", "level-high");
-    valueDisplay.classList.add(levelClass);
+  if (!name || isNaN(level) || level < 1 || level > 10) {
+    errorMsg.style.display = "block";
+    return;
+  }
+  errorMsg.style.display = "none";
+
+  userSkills[name] = level;
+  renderSkillsList();
+
+  nameInput.value = "";
+  levelInput.value = "";
+  nameInput.focus();
+
+  document.getElementById("addSkillForm").style.display = "none";
+  updateProgress();
+}
+
+function getLevelColor(level) {
+  if (level <= 3) return "#ef4444";
+  if (level <= 6) return "#f59e0b";
+  return "#16a34a";
+}
+
+function renderSkillsList() {
+  const list = document.getElementById("skillsList");
+
+  if (Object.keys(userSkills).length === 0) {
+    list.innerHTML = '<p class="text-muted" id="emptyMsg" style="font-size:0.9rem;">No skills added yet. Click "Add Skill" to start.</p>';
+    return;
   }
 
-  // Update slider track fill color
-  const percent = ((value - 1) / 9) * 100;
-  const color =
-    levelClass === "level-low"
-      ? "#ef4444"
-      : levelClass === "level-medium"
-        ? "#f59e0b"
-        : "#16a34a";
-  rangeInput.style.background =
-    "linear-gradient(to right, " + color + " " + percent + "%, #e2e8f0 " + percent + "%)";
+  list.innerHTML = "";
+  Object.keys(userSkills).forEach(function (name) {
+    const level = userSkills[name];
+    const color = getLevelColor(level);
+    const div = document.createElement("div");
+    div.className = "skill-added-item";
+    div.innerHTML =
+      '<span class="skill-badge">' + name + '</span>' +
+      '<span class="skill-level">Level: <strong style="color:' + color + '">' + level + ' / 10</strong></span>' +
+      '<button class="btn-remove" onclick="removeSkill(\'' + name.replace(/'/g, "\\'") + '\')" title="Remove"><i class="fa-solid fa-xmark"></i></button>';
+    list.appendChild(div);
+  });
+}
 
-  rangeInput.dataset.touched = "true";
+function removeSkill(name) {
+  delete userSkills[name];
+  renderSkillsList();
   updateProgress();
 }
 
 /**
- * Initialize all skill range sliders
- */
-function initSliders() {
-  document.querySelectorAll(".skill-range").forEach(function (slider) {
-    updateSliderUI(slider);
-    slider.addEventListener("input", function () {
-      updateSliderUI(slider);
-    });
-  });
-}
-
-/**
- * Bootstrap tab switching - mark tab as visited for progress
- */
-function initTabs() {
-  const tabButtons = document.querySelectorAll('#skillTabs button[data-bs-toggle="tab"]');
-  tabButtons.forEach(function (btn) {
-    btn.addEventListener("shown.bs.tab", function () {
-      btn.dataset.visited = "true";
-      updateProgress();
-    });
-  });
-  // First tab counts as visited on load
-  if (tabButtons[0]) tabButtons[0].dataset.visited = "true";
-}
-
-function initDomainFields() {
-  ["domainField", "domainYears", "domainCerts", "domainProjects"].forEach(function (id) {
-    const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener("input", updateProgress);
-      el.addEventListener("change", updateProgress);
-    }
-  });
-}
-
-/**
- * Calculate assessment completion percentage
+ * Progress bar based on number of skills added
  */
 function updateProgress() {
-  const totalSteps = 19;
-  let completed = 0;
-
-  document.querySelectorAll(".skill-range").forEach(function (s) {
-    if (s.dataset.touched === "true" || s.value) completed++;
-  });
-
-  const field = document.getElementById("domainField");
-  const years = document.getElementById("domainYears");
-  const certs = document.getElementById("domainCerts");
-  const projects = document.getElementById("domainProjects");
-
-  if (field && field.value) completed++;
-  if (years && years.value !== "") completed++;
-  if (certs && certs.value.trim()) completed++;
-  if (projects && projects.value !== "") completed++;
-
-  const percent = Math.min(100, Math.round((completed / totalSteps) * 100));
+  const count = Object.keys(userSkills).length;
+  const percent = count === 0 ? 0 : Math.min(100, count * 10);
 
   const fill = document.getElementById("progressFill");
   const percentText = document.getElementById("progressPercent");
@@ -183,29 +168,13 @@ function updateProgress() {
 }
 
 /**
- * Collect all form data for API
+ * Collect skill data for API
  */
 function collectSkillData() {
-  const technical = {};
-  const soft = {};
-
-  document.querySelectorAll("#technical .skill-range").forEach(function (s) {
-    technical[s.dataset.skillName] = parseInt(s.value, 10);
-  });
-
-  document.querySelectorAll("#soft .skill-range").forEach(function (s) {
-    soft[s.dataset.skillName] = parseInt(s.value, 10);
-  });
-
   return {
-    technical: technical,
-    soft: soft,
-    domain: {
-      field: document.getElementById("domainField").value,
-      years: document.getElementById("domainYears").value,
-      certifications: document.getElementById("domainCerts").value.trim(),
-      projects: parseInt(document.getElementById("domainProjects").value, 10) || 0,
-    },
+    technical: userSkills,
+    soft: {},
+    domain: { field: "", years: "", certifications: "", projects: 0 },
   };
 }
 
@@ -219,11 +188,15 @@ function initAnalyzeButton() {
   if (!btn) return;
 
   btn.addEventListener("click", async function () {
+    if (Object.keys(userSkills).length === 0) {
+      alert("Please add at least one skill before analyzing.");
+      return;
+    }
+
     const skillData = collectSkillData();
 
     btn.disabled = true;
-    btn.innerHTML =
-      '<span class="spinner-border spinner-border-sm"></span> Analyzing...';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Analyzing...';
     if (formCard) formCard.classList.add("assessment-form-hidden");
 
     showLoadingState();
@@ -300,21 +273,9 @@ function generateMockAnalysis(skillData) {
     return order[a.priority] - order[b.priority];
   });
 
-  const radarLabels = [
-    "Python",
-    "Web Dev",
-    "Database",
-    "Communication",
-    "Problem Solving",
-  ];
-  const yourSkills = [
-    allSkills["Python Programming"] || 5,
-    allSkills["Web Development HTML CSS"] || 5,
-    allSkills["Database SQL"] || 5,
-    allSkills["Communication"] || 5,
-    allSkills["Problem Solving"] || 5,
-  ];
-  const industry = [9, 8, 8, 8, 9];
+  const radarLabels = Object.keys(allSkills).slice(0, 5);
+  const yourSkills = radarLabels.map(function (k) { return allSkills[k]; });
+  const industry = radarLabels.map(function (k) { return industryRequirements[k] || 8; });
 
   let totalScore = 0;
   let count = 0;
