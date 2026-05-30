@@ -7,18 +7,18 @@ let radarChart = null;
 const userSkills = {};
 
 // Industry required levels for gap analysis (mock AI)
-// const industryRequirements = {
-//   "Python Programming": 9,
-//   "Web Development HTML CSS": 8,
-//   "Database SQL": 8,
-//   "Data Structures": 8,
-//   "Git and Version Control": 7,
-//   Communication: 8,
-//   Teamwork: 7,
-//   "Problem Solving": 9,
-//   "Time Management": 7,
-//   Leadership: 6,
-// };
+const industryRequirements = {
+  "Python Programming": 9,
+  "Web Development HTML CSS": 8,
+  "Database SQL": 8,
+  "Data Structures": 8,
+  "Git and Version Control": 7,
+  Communication: 8,
+  Teamwork: 7,
+  "Problem Solving": 9,
+  "Time Management": 7,
+  Leadership: 6,
+};
 
 document.addEventListener("DOMContentLoaded", function () {
   initSidebar();

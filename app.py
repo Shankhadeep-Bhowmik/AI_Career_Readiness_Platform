@@ -3,6 +3,9 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_mysqldb import MySQL
 import os
 from datetime import datetime
+import json
+from google import genai
+from google.genai import types
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
