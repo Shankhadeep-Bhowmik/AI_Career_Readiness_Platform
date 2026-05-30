@@ -8,17 +8,15 @@ from groq import Groq
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-# Gemini ai and api 
+# Groq AI and api
 try:
   with open("Api.txt", "r") as file:
-    api_key_from_file = file.read().strip()
-  os.environ["GEMINI_API_KEY"] = api_key_from_file
+    groq_api_key = file.read().strip()
 except FileNotFoundError:
-  print("ERROR: File not found")
-except Exception as e:
-  print("Error : ",e)
+  print("ERROR: Api.txt not found")
+  groq_api_key = ""
 
-ai = genai.Client()
+ai = Groq(api_key=groq_api_key)
 
 
 # MySQL Configuration
@@ -378,12 +376,13 @@ Rules:
 """
 
   try:
-    response = ai.models.generate_content(
-      model='gemini-2.0-flash',
-      contents=prompt
+    response = ai.chat.completions.create(
+      model='llama-3.3-70b-versatile',
+      messages=[{'role': 'user', 'content': prompt}],
+      temperature=0.3
     )
 
-    raw = response.text.strip()
+    raw = response.choices[0].message.content.strip()
 
     # Remove markdown code fences if Gemini adds them
     if raw.startswith("```"):
