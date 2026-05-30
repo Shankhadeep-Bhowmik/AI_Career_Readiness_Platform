@@ -4,10 +4,22 @@ from flask_mysqldb import MySQL
 import os
 from datetime import datetime
 import json
-from google import genai
-from google.genai import types
+from groq import Groq
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
+
+# Gemini ai and api 
+try:
+  with open("Api.txt", "r") as file:
+    api_key_from_file = file.read().strip()
+  os.environ["GEMINI_API_KEY"] = api_key_from_file
+except FileNotFoundError:
+  print("ERROR: File not found")
+except Exception as e:
+  print("Error : ",e)
+
+ai = genai.Client()
+
 
 # MySQL Configuration
 app.config['MYSQL_HOST'] = 'localhost'
@@ -328,7 +340,66 @@ def api_skills():
   mysql.connection.commit()
   cursor.close()
 
-  return jsonify({'success': False})
+  #Build skill list for gemini prompt
+  skill_lines = '\n'.join([f'- {name}: {level}/10' for name, level in all_skills.items()])
+
+  prompt = f"""
+You are a career readiness AI. A student has rated their skills below.
+Analyze the skill gaps and return ONLY a valid JSON object. No explanation, no markdown, no extra text.
+
+Student skills:
+{skill_lines}
+
+Return this exact JSON structure:
+{{
+  "careerScore": <integer 0-100>,
+  "gaps": [
+    {{
+      "skill": "<skill name>",
+      "priority": "<high | medium | low>",
+      "current": <integer>,
+      "required": <integer>,
+      "message": "<one sentence advice>"
+    }}
+  ],
+  "radar": {{
+    "labels": ["<skill1>", "<skill2>", "<skill3>", "<skill4>", "<skill5>"],
+    "yourSkills": [<level1>, <level2>, <level3>, <level4>, <level5>],
+    "industryRequired": [<req1>, <req2>, <req3>, <req4>, <req5>]
+  }}
+}}
+
+Rules:
+- careerScore: overall readiness percentage based on skill levels vs industry needs
+- gaps: only skills that need improvement, sorted high to low priority
+- radar: pick top 5 skills from the list
+- industryRequired: realistic industry expectations for each skill (1-10)
+- Return ONLY the JSON, nothing else
+"""
+
+  try:
+    response = ai.models.generate_content(
+      model='gemini-2.0-flash',
+      contents=prompt
+    )
+
+    raw = response.text.strip()
+
+    # Remove markdown code fences if Gemini adds them
+    if raw.startswith("```"):
+      raw = raw.split("```")[1]
+      if raw.startswith("json"):
+        raw = raw[4:]
+      raw = raw.strip()
+
+    result = json.loads(raw)
+    result['success'] = True
+    return jsonify(result)
+
+  except json.JSONDecodeError:
+    return jsonify({'success': False, 'message': 'AI returned invalid response. Please try again.'}), 500
+  except Exception as e:
+    return jsonify({'success': False, 'message': f'AI analysis failed: {str(e)}'}), 500
 
 
 # Skill assessment

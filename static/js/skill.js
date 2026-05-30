@@ -6,19 +6,7 @@
 let radarChart = null;
 const userSkills = {};
 
-// Industry required levels for gap analysis (mock AI)
-const industryRequirements = {
-  "Python Programming": 9,
-  "Web Development HTML CSS": 8,
-  "Database SQL": 8,
-  "Data Structures": 8,
-  "Git and Version Control": 7,
-  Communication: 8,
-  Teamwork: 7,
-  "Problem Solving": 9,
-  "Time Management": 7,
-  Leadership: 6,
-};
+
 
 document.addEventListener("DOMContentLoaded", function () {
   initSidebar();
@@ -196,7 +184,7 @@ function initAnalyzeButton() {
     const skillData = collectSkillData();
 
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Analyzing...';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> AI is Analyzing...';
     if (formCard) formCard.classList.add("assessment-form-hidden");
 
     showLoadingState();
@@ -213,16 +201,21 @@ function initAnalyzeButton() {
       if (response.ok && data.success) {
         displayResults(data);
       } else {
-        displayResults(generateMockAnalysis(skillData));
+        alert("AI Error: "+(data.message || "Failed to analyze skills. Please try again later."));
+        resetFormUI();
       }
     } catch (err) {
-      displayResults(generateMockAnalysis(skillData));
+      alert("Could not connect to AI service. Showing mock analysis instead.");
+      resetFormUI();
     }
+  });
 
+  function resetFormUI() {
     btn.disabled = false;
     btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Analyze My Skills';
     if (formCard) formCard.classList.remove("assessment-form-hidden");
-  });
+    document.getElementById("aiLoading").style.display = "none";
+  }
 }
 
 function showLoadingState() {
