@@ -461,5 +461,125 @@ def logout():
   session.clear()
   return redirect(url_for('home'))
 
+@app.route('/api/roadmap')
+def api_roadmap():
+  if not check_session():
+    return jsonify({
+      'success':False,
+      'message':'Not logged in'
+    }), 401
+  
+  user_id = session['user_id']
+  cursor = mysql.connection.cursor()
+
+  cursor.execute(
+    'SELECT skill_name, current_level FROM skill WHERE user_id = %s', (user_id,)
+  )
+  skills = cursor.fetchall()
+  cursor.close()
+
+  if not skills:
+    return jsonify({
+      'success':False,
+      'message':'No skills found'
+    }), 404
+  
+  skill_lines = '\n'.join([
+        f"- {s['skill_name']}: {s['current_level']}/10"
+        for s in skills
+  ])
+
+  prompt = f"""
+  You are a career roadmap AI for 2026-2027.
+  A student has these skills:
+  {skill_lines}
+
+Your job:
+1. Understand what career path this student is heading towards
+2. Generate a personalized step by step learning roadmap for 2026-2027
+3. Include skills the student doesn't know yet but industry demands in 2026-2027
+4. If student knows HTML CSS JS — understand they want web development and add React, TypeScript, Tailwind etc.
+5. Each step should build on the previous one logically
+
+Return ONLY valid JSON, no explanation, no markdown:
+{{
+  "careerPath": "<detected career path>",
+  "steps": [
+    {{
+      "id": 1,
+      "topic": "<topic name>",
+      "icon": "<font awesome class like fa-solid fa-code>",
+      "description": "<2 sentence description of what to learn and why>",
+      "estimatedTime": "<realistic time like 2 weeks>",
+      "difficulty": "<Beginner or Intermediate or Advanced>",
+      "status": "current",
+      "whyImportant": "<one line why this skill matters in 2026-2027 industry>",
+      {{
+  "careerPath": "<detected career path like Full Stack Developer>",
+  "summary": "<2 sentence overview of this roadmap>",
+  "phases": [
+    {{
+      "phaseNumber": 1,
+      "phaseTitle": "<phase name like Frontend Fundamentals>",
+      "skills": [
+        {{
+          "id": 1,
+          "skillName": "<skill name like HTML5>",
+          "icon": "<font awesome class>",
+          "status": "current",
+          "description": "<one line what this skill is>",
+          "whyImportant": "<one line why industry needs this in 2026-2027>",
+          "estimatedTime": "<like 1 week>",
+          "difficulty": "<Beginner or Intermediate or Advanced>"
+        }}
+      ]
+    }}
+  ]
+ }}
+    }}
+  ]
+}}
+
+Rules:
+- Group skills into phases like Frontend, Backend, Tools, Advanced
+- Each phase has 3 to 5 skills maximum
+- First phase covers gaps in existing skills
+- Later phases add new 2026-2027 industry demanded skills
+- Skills go from Beginner to Advanced progressively
+- NO youtube links, NO articles, NO courses, NO exercises
+- This is a ROADMAP not a course provider
+- Return ONLY the JSON nothing else
+"""
+  try:
+    response = ai.chat.completions.create(
+        model='llama-3.3-70b-versatile',
+      messages=[{'role': 'user', 'content': prompt}],
+      temperature=0.4
+    )
+
+    raw = response.choices[0].message.content.strip()
+
+        # Remove markdown if AI adds it
+    if raw.startswith("```"):
+      raw = raw.split("```")[1]
+      if raw.startswith("json"):
+        raw = raw[4:]
+        raw = raw.strip()
+
+    result = json.loads(raw)
+    result['success'] = True
+    return jsonify(result)
+
+  except json.JSONDecodeError:
+    return jsonify({'success': False, 'message': 'AI returned invalid response'}), 500
+  except Exception as e:
+    return jsonify({'success': False, 'message': f'AI failed: {str(e)}'}), 500
+
+@app.route('/api/roadmap/regenrate', methods=['POST'])
+def api_roadmap_regenrate():
+  return api_roadmap()  # For simplicity, just call the same function to regenerate
+
+
+
 if __name__ == '__main__':
   app.run(debug=True)
