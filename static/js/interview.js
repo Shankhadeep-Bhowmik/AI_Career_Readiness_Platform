@@ -1,7 +1,3 @@
-/**
- * AI Career Readiness Platform - Interview Practice JavaScript
- * Chat interface, timer, speech-to-text, API calls, summary chart
- */
 
 let interviewState = {
   sessionId: null,
@@ -18,79 +14,7 @@ let interviewState = {
 
 let summaryChart = null;
 
-const STATS_STORAGE_KEY = "interview_stats";
 
-// Mock questions by interview type
-const mockQuestionBank = {
-  "Technical Interview": [
-    "Explain the difference between a list and a tuple in Python.",
-    "What is normalization in databases and why is it important?",
-    "How does the HTTP request and response cycle work?",
-    "What is the time complexity of binary search?",
-    "Explain OOP concepts: inheritance, encapsulation, and polymorphism.",
-    "What is an API and how does REST work?",
-    "Describe how you would debug a production issue.",
-    "What is Git and how do branches work?",
-    "Explain SQL JOIN types with examples.",
-    "What are indexes in a database?",
-    "How would you design a URL shortener?",
-    "What is the difference between SQL and NoSQL?",
-    "Explain recursion with an example.",
-    "What is a hash table?",
-    "Describe your favorite data structure and why.",
-  ],
-  "HR Interview": [
-    "Tell me about yourself.",
-    "Why do you want to join our company?",
-    "What are your strengths and weaknesses?",
-    "Where do you see yourself in 5 years?",
-    "Why should we hire you?",
-    "Describe a challenging situation at work or college.",
-    "What is your expected salary?",
-    "Are you willing to relocate?",
-    "How do you handle stress and pressure?",
-    "Do you prefer working in a team or alone?",
-    "Tell me about a time you showed leadership.",
-    "What motivates you?",
-    "How do you prioritize tasks?",
-    "What do you know about our company?",
-    "Do you have any questions for us?",
-  ],
-  "Behavioral Interview": [
-    "Describe a time you failed and what you learned.",
-    "Tell me about a conflict with a teammate and how you resolved it.",
-    "Give an example of when you went above and beyond.",
-    "Describe a situation where you had to meet a tight deadline.",
-    "Tell me about a time you received critical feedback.",
-    "Describe a project you are most proud of.",
-    "Give an example of adapting to change quickly.",
-    "Tell me about a time you had to persuade others.",
-    "Describe when you took initiative without being asked.",
-    "Tell me about handling multiple priorities.",
-    "Describe a ethical dilemma you faced.",
-    "Give an example of learning a new skill fast.",
-    "Tell me about mentoring or helping a peer.",
-    "Describe a time you disagreed with your manager.",
-    "Tell me about your biggest achievement.",
-  ],
-  "Mixed Interview": [
-    "Tell me about yourself and your technical background.",
-    "Explain a recent project you built and technologies used.",
-    "What is your greatest strength for this role?",
-    "How do you stay updated with technology trends?",
-    "Describe a bug you fixed and your approach.",
-    "Where do you see yourself in 3 years?",
-    "Explain REST API in simple terms.",
-    "Tell me about a teamwork experience.",
-    "What is SQL injection and how to prevent it?",
-    "Why do you want this job?",
-    "Describe a time you learned from failure.",
-    "What is version control and why use Git?",
-    "How do you handle tight deadlines?",
-    "Explain difference between frontend and backend.",
-    "Do you have any questions for us?",
-  ],
-};
 
 document.addEventListener("DOMContentLoaded", function () {
   initSidebar();
@@ -141,36 +65,22 @@ function initLogout() {
 /**
  * Load interview stats from localStorage
  */
-function loadStats() {
+async function loadStats() {
   try {
-    const stats = JSON.parse(localStorage.getItem(STATS_STORAGE_KEY) || "{}");
-    document.getElementById("statTotal").textContent = stats.total || 0;
-    document.getElementById("statAverage").textContent = stats.average
-      ? stats.average + "%"
-      : "0%";
-    document.getElementById("statBest").textContent = stats.best ? stats.best + "%" : "0%";
+    const response = await fetch("/api/interview/stats");
+    const data = await response.json();
+    if (data.success) {
+      document.getElementById("statTotal").textContent = data.total || 0;
+      document.getElementById("statAverage").textContent = data.average ? data.average + "%" : "0%";
+      document.getElementById("statBest").textContent = data.best ? data.best + "%" : "0%";
+    }
   } catch {
     /* use defaults */
   }
 }
 
-function saveStats(overallScore) {
-  try {
-    const stats = JSON.parse(localStorage.getItem(STATS_STORAGE_KEY) || "{}");
-    stats.total = (stats.total || 0) + 1;
-    stats.scores = stats.scores || [];
-    stats.scores.push(overallScore);
-    stats.average = Math.round(
-      stats.scores.reduce(function (a, b) {
-        return a + b;
-      }, 0) / stats.scores.length
-    );
-    stats.best = Math.max(stats.best || 0, overallScore);
-    localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(stats));
-    loadStats();
-  } catch {
-    /* ignore */
-  }
+function saveStats() {
+  loadStats();
 }
 
 /**
@@ -394,7 +304,12 @@ function initSubmitAnswer() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        feedback = data.feedback;
+        feedback = {
+          score: data.score,
+          good: data.good || [],
+          improve: data.improve || [],
+          idealAnswer: data.idealAnswer || ""
+        };
       } else {
         feedback = generateMockFeedback(answer, question);
       }

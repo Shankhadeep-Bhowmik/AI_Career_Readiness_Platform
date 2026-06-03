@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 import json
 from groq import Groq
+
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
@@ -444,6 +445,157 @@ def interview():
     return redirect(url_for('login'))
   return render_template('interview.html')
 
+@app.route('/api/interview/start', methods=['POST'])
+def api_interview_start():
+  if not check_session():
+    return jsonify({'success': False, 'message': 'Not logged in'}), 401
+  data = request.get_json(silent=True) or {}
+  interview_type = data.get('type', 'Technical Interview')
+  difficulty = data.get('difficulty', 'Beginner')
+  question_count = int(data.get('questionCount', 5))
+  user_id = session['user_id']
+
+  cursor = mysql.connection.cursor()
+  cursor.execute('SELECT skill_name, current_level FROM skill WHERE user_id = %s', (user_id,))
+  skills = cursor.fetchall()
+  cursor.close()
+
+  skill_lines = '\n'.join([
+    f"{s['skill_name']}: {s['current_level']}/10"
+    for s in skills
+  ]) if skills else "General student with no specific skills assessed yet."
+
+  prompt = f"""
+  You are a professional interviewer conducting a {interview_type} at {difficulty} level.
+The student has these skills:
+{skill_lines}
+
+Generate exactly {question_count} interview questions personalized to their skill level.
+Return ONLY valid JSON, no explanation, no markdown:
+{{
+  "sessionId": "ai_session_{user_id}",
+  "questions": [
+    "<question 1>",
+    "<question 2>",
+    "<question 3>"
+  ]
+}}
+
+Rules:
+- Questions must match {interview_type} style
+- Difficulty must be {difficulty} level
+- Personalize based on student skills listed above
+- For Technical Interview: ask about their specific skills
+- For HR Interview: ask career goals and personality questions
+- For Behavioral Interview: use STAR method style questions
+- For Mixed Interview: mix of technical and HR questions
+- Return ONLY the JSON nothing else
+"""
+  try:
+    response = ai.chat.completions.create(
+      model = 'llama-3.3-70b-versatile',
+      messages=[{'role': 'user', 'content': prompt}],
+      temperature=0.7
+    )
+    raw = response.choices[0].message.content.strip()
+    if raw.startswith("```"):
+      raw = raw.split("```")[1]
+      if raw.startswith("json"):
+        raw = raw[4:]
+      raw = raw.strip()
+    
+    result = json.loads(raw)
+    result['success'] = True
+    return jsonify(result)
+  except Exception as e:
+    return jsonify({'success':False, 'message':str(e)}), 500
+
+@app.route('/api/interview/answer', methods=['POST'])
+def api_interview_answer():
+    if not check_session():
+        return jsonify({'success': False, 'message': 'Not logged in'}), 401
+
+    data = request.get_json(silent=True) or {}
+    question = data.get('question', '')
+    answer = data.get('answer', '')
+    interview_type = data.get('type', 'Technical Interview')
+    difficulty = data.get('difficulty', 'Beginner')
+
+    if not question or not answer:
+        return jsonify({'success': False, 'message': 'Question and answer required'}), 400
+
+    prompt = f"""
+You are a professional interviewer evaluating a candidate's answer.
+
+Interview Type: {interview_type}
+Difficulty: {difficulty}
+Question: {question}
+Candidate Answer: {answer}
+
+Evaluate honestly and return ONLY valid JSON, no explanation, no markdown:
+{{
+  "score": <integer 1-10>,
+  "good": [
+    "<genuine positive point 1>",
+    "<genuine positive point 2>"
+  ],
+  "improve": [
+    "<specific improvement 1>",
+    "<specific improvement 2>"
+  ],
+  "idealAnswer": "<what a perfect answer would include in 2-3 sentences>"
+}}
+
+Scoring:
+- 1-4: Poor
+- 5-6: Average
+- 7-8: Good
+- 9-10: Excellent
+- Return ONLY the JSON nothing else
+"""
+
+    try:
+        response = ai.chat.completions.create(
+            model='llama-3.3-70b-versatile',
+            messages=[{'role': 'user', 'content': prompt}],
+            temperature=0.3
+        )
+
+        raw = response.choices[0].message.content.strip()
+
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+            raw = raw.strip()
+
+        result = json.loads(raw)
+
+        # Save to database
+        user_id = session['user_id']
+        cursor = mysql.connection.cursor()
+        cursor.execute('''
+            INSERT INTO interview(user_id, question, answer, feedback, score)
+            VALUES (%s, %s, %s, %s, %s)
+        ''', (
+            user_id,
+            question,
+            answer,
+            json.dumps({
+                'good': result.get('good', []),
+                'improve': result.get('improve', [])
+            }),
+            result.get('score', 5)
+        ))
+        mysql.connection.commit()
+        cursor.close()
+
+        result['success'] = True
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 @app.route('/resume')
 def resume():
   if not check_session():
@@ -574,6 +726,35 @@ Rules:
     return jsonify({'success': False, 'message': 'AI returned invalid response'}), 500
   except Exception as e:
     return jsonify({'success': False, 'message': f'AI failed: {str(e)}'}), 500
+
+@app.route('/api/interview/stats')
+def api_interview_stats():
+    if not check_session():
+        return jsonify({'success': False}), 401
+
+    user_id = session['user_id']
+    cursor = mysql.connection.cursor()
+    cursor.execute(
+        'SELECT score FROM interview WHERE user_id = %s AND score IS NOT NULL',
+        (user_id,)
+    )
+    rows = cursor.fetchall()
+    cursor.close()
+
+    if not rows:
+        return jsonify({'success': True, 'total': 0, 'average': 0, 'best': 0})
+
+    scores = [r['score'] for r in rows]
+    total = len(scores)
+    average = round(sum(scores) / total)
+    best = max(scores)
+
+    return jsonify({
+        'success': True,
+        'total': total,
+        'average': average,
+        'best': best
+    })
 
 @app.route('/api/roadmap/regenrate', methods=['POST'])
 def api_roadmap_regenrate():
