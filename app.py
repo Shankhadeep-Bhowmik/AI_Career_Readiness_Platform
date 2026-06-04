@@ -760,7 +760,99 @@ def api_interview_stats():
 def api_roadmap_regenrate():
   return api_roadmap()  # For simplicity, just call the same function to regenerate
 
+@app.route('/api/resume/feedback', methods=['POST'])
+def api_resume_feedback():
+    if not check_session():
+        return jsonify({'success': False, 'message': 'Not logged in'}), 401
 
+    data = request.get_json(silent=True) or {}
+
+    personal = data.get('personal', {})
+    objective = data.get('objective', '')
+    education = data.get('education', [])
+    skills = data.get('skills', [])
+    projects = data.get('projects', [])
+    certifications = data.get('certifications', [])
+
+    # Build resume summary for AI
+    resume_summary = f"""
+Name: {personal.get('fullName', 'Not provided')}
+Email: {personal.get('email', 'Not provided')}
+Phone: {personal.get('phone', 'Not provided')}
+City: {personal.get('city', 'Not provided')}
+LinkedIn: {personal.get('linkedin', 'Not provided')}
+GitHub: {personal.get('github', 'Not provided')}
+
+Career Objective: {objective or 'Not provided'}
+
+Education: {json.dumps(education)}
+Skills: {', '.join(skills) if skills else 'None'}
+Projects: {json.dumps(projects)}
+Certifications: {json.dumps(certifications)}
+"""
+
+    prompt = f"""
+You are a professional resume reviewer helping a student get their first job.
+Review this resume and give honest, constructive feedback.
+
+RESUME CONTENT:
+{resume_summary}
+
+Return ONLY valid JSON, no explanation, no markdown:
+{{
+  "score": <integer 0-100>,
+  "good": [
+    "<genuine positive point 1>",
+    "<genuine positive point 2>",
+    "<genuine positive point 3>"
+  ],
+  "improve": [
+    "<specific improvement 1>",
+    "<specific improvement 2>",
+    "<specific improvement 3>"
+  ],
+  "missing": [
+    "<missing section or detail 1>",
+    "<missing section or detail 2>"
+  ],
+  "suggestions": {{
+    "personal": "<specific suggestion for personal section>",
+    "objective": "<specific suggestion for career objective>",
+    "skills": "<specific suggestion for skills section>",
+    "projects": "<specific suggestion for projects section>"
+  }}
+}}
+
+Scoring guide:
+- Start at 40 base score
+- Add points for each complete section
+- Deduct for missing or weak sections
+- Maximum 100
+- Be honest — a weak resume should score 40-50
+- Return ONLY the JSON nothing else
+"""
+
+    try:
+        response = ai.chat.completions.create(
+            model='llama-3.3-70b-versatile',
+            messages=[{'role': 'user', 'content': prompt}],
+            temperature=0.3
+        )
+
+        raw = response.choices[0].message.content.strip()
+
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+            raw = raw.strip()
+
+        result = json.loads(raw)
+        result['success'] = True
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 if __name__ == '__main__':
   app.run(debug=True)
