@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 import json
 from groq import Groq
+import requests
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -853,6 +854,74 @@ Scoring guide:
 
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
+
+
+# Load News API Key
+try:
+    with open("News_API.txt", "r") as file:
+        news_api_key = file.read().strip()
+except FileNotFoundError:
+    print("ERROR: News_Api.txt not found")
+    news_api_key = ""
+
+@app.route('/api/news')
+def api_news():
+    if not check_session():
+        return jsonify({'success': False, 'message': 'Not logged in'}), 401
+
+    # Get query parameters sent by news.js
+    page = request.args.get('page', default=1, type=int)
+    page_size = request.args.get('pageSize', default=9, type=int)
+    category = request.args.get('category', default='all')
+    search_keyword = request.args.get('q', default='').strip()
+
+    if not news_api_key:
+        return jsonify({'success': False, 'message': 'News API key is missing on the server.'}), 500
+
+    # Map your frontend dashboard categories to target keywords for NewsAPI
+    category_keywords = {
+        'ai': 'artificial intelligence OR machine learning OR deep learning',
+        'web': 'web development OR javascript OR reactjs OR nodejs',
+        'data': 'data science OR big data OR python programming OR sql',
+        'cyber': 'cybersecurity OR ethical hacking OR infoSec',
+        'cloud': 'cloud computing OR aws OR azure OR devops'
+    }
+
+    # Construct search query
+    if search_keyword:
+        query = search_keyword
+    elif category in category_keywords:
+        query = category_keywords[category]
+    else:
+        # Default fallback catch-all tech query for "all" category
+        query = 'technology OR tech software OR computer science'
+
+    # Build the live NewsAPI endpoint URL (focusing on developer/tech headlines)
+    news_url = f"https://newsapi.org/v2/everything?q={query}&language=en&sortBy=publishedAt&pageSize={page_size}&page={page}&apiKey={news_api_key}"
+
+    try:
+        response = requests.get(news_url, timeout=10)
+        news_data = response.json()
+
+        if news_data.get('status') == 'ok':
+            articles = news_data.get('articles', [])
+            total_results = news_data.get('totalResults', 0)
+            
+            # Check if there are more articles available for pagination
+            has_more = (page * page_size) < total_results
+
+            return jsonify({
+                'success': True,
+                'articles': articles,
+                'hasMore': has_more
+            })
+        else:
+            return jsonify({'success': False, 'message': news_data.get('message', 'Failed to fetch news')}), 400
+
+    except Exception as e:
+        return jsonify({'success': False, 'message': f"Internet connectivity error: {str(e)}"}), 500
+    
+
 
 if __name__ == '__main__':
   app.run(debug=True)

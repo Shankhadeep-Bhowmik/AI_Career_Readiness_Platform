@@ -43,41 +43,41 @@
          LEFT SIDEBAR (same as dashboard)
          ============================================ -->
     <aside class="sidebar" id="sidebar">
-      <a href="/dashboard" class="sidebar-logo">
+      <a href="{{ url_for('dashboard') }}" class="sidebar-logo">
         <i class="fa-solid fa-graduation-cap"></i>
         AI Career Readiness
       </a>
 
       <!-- Student profile (kept simple for college project) -->
       <div class="sidebar-profile">
-        <div class="profile-avatar" id="profileInitialsSidebar">S</div>
+        <div class="profile-avatar" id="profileInitialsSidebar" ></div>
         <div class="profile-info">
-          <h3 id="sidebarStudentName">Student</h3>
-          <p id="sidebarCourse">Career Journey</p>
+          <h3 id="sidebarStudentName"></h3>
+          <p id="sidebarCourse"></p>
         </div>
       </div>
 
       <ul class="sidebar-nav">
         <li>
-          <a href="/dashboard"><i class="fa-solid fa-house"></i> Dashboard</a>
+          <a href="{{ url_for('dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
         </li>
         <li>
-          <a href="/skills"><i class="fa-solid fa-chart-bar"></i> Skill Assessment</a>
+          <a href="{{ url_for('skills') }}"><i class="fa-solid fa-chart-bar"></i> Skill Assessment</a>
         </li>
         <li>
-          <a href="/roadmap"><i class="fa-solid fa-map"></i> Learning Roadmap</a>
+          <a href="{{ url_for('roadmap') }}"><i class="fa-solid fa-map"></i> Learning Roadmap</a>
         </li>
         <li>
-          <a href="/interview"><i class="fa-solid fa-microphone"></i> Interview Practice</a>
+          <a href="{{ url_for('interview') }}"><i class="fa-solid fa-microphone"></i> Interview Practice</a>
         </li>
         <li>
-          <a href="/resume"><i class="fa-solid fa-file-lines"></i> Resume Builder</a>
+          <a href="{{ url_for('resume') }}"><i class="fa-solid fa-file-lines"></i> Resume Builder</a>
         </li>
         <li>
-          <a href="/news" class="active"><i class="fa-solid fa-newspaper"></i> Tech News</a>
+          <a href="{{ url_for('news') }}" class="active"><i class="fa-solid fa-newspaper"></i> Tech News</a>
         </li>
         <li>
-          <a href="#" class="logout-link" id="logoutBtn">
+          <a href="{{ url_for('logout') }}" class="logout-link" id="logoutBtn">
             <i class="fa-solid fa-right-from-bracket"></i> Logout
           </a>
         </li>
@@ -226,11 +226,11 @@
 
     <!-- Mobile bottom navigation -->
     <nav class="bottom-nav" aria-label="Mobile navigation">
-      <a href="/dashboard"><i class="fa-solid fa-house"></i><span>Home</span></a>
-      <a href="/skills"><i class="fa-solid fa-chart-bar"></i><span>Skills</span></a>
-      <a href="/roadmap"><i class="fa-solid fa-map"></i><span>Roadmap</span></a>
-      <a href="/interview"><i class="fa-solid fa-microphone"></i><span>Interview</span></a>
-      <a href="#" id="logoutBtnMobile"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
+      <a href="{{ url_for('home') }}"><i class="fa-solid fa-house"></i><span>Home</span></a>
+      <a href="{{ url_for('skills') }}"><i class="fa-solid fa-chart-bar"></i><span>Skills</span></a>
+      <a href="{{ url_for('roadmap') }}"><i class="fa-solid fa-map"></i><span>Roadmap</span></a>
+      <a href="{{ url_for('interview') }}"><i class="fa-solid fa-microphone"></i><span>Interview</span></a>
+      <a href="{{ url_for('logout') }}" id="logoutBtnMobile"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
     </nav>
 
     <!-- Bootstrap 5 JavaScript -->
@@ -241,5 +241,7 @@
 
     <!-- News page JavaScript -->
     <script src="/static/js/news.js"></script>
+    <!-- Adding dashboard.js for name -->
+    <script src="/static/js/dashboard.js"></script>
   </body>
 </html>
