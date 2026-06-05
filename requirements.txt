@@ -1,5 +1,0 @@
-Flask
-Flask-MySQLdb
-PyMySQL
-groq
-requests
