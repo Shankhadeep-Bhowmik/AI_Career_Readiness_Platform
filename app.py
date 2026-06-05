@@ -43,13 +43,25 @@ def home():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
   if request.method == 'POST':
-    name = request.form['name']
-    email = request.form['email']
-    password = request.form['password']
-    course = request.form['course']
+    name = request.form.get('name', '').strip()
+    email = request.form.get('email', '').strip()
+    password = request.form.get('password', '').strip()
+    course = request.form.get('course', '').strip()
+
+    if not name or not email or not password or not course:
+      flash('All fields are required. Please fill in the form completely.', 'danger')
+      return redirect(url_for('register'))
 
     try:
       cursor = mysql.connection.cursor()
+      # Check if email already exists
+      cursor.execute('SELECT user_id FROM user WHERE email = %s', (email,))
+      existing = cursor.fetchone()
+      if existing:
+         cursor.close()
+         flash('User already exists with this email address.', 'warning')
+         return redirect(url_for('register'))
+      
       #Insert text details into your live user table columns
       cursor.execute(
         'INSERT INTO user(name, email, password, course) VALUES (%s, %s, %s, %s)', (name, email, password, course)
