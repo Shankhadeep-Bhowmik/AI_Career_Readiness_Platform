@@ -151,33 +151,8 @@ git clone https://github.com/Shankhadeep-Bhowmik/AI_Career_Readiness_Platform.gi
 cd AI-Career-Readiness-Platform
 ```
 
-### 2. Create Virtual Environment
 
-```bash
-python -m venv venv
-```
-
-### 3. Activate Virtual Environment
-
-Windows:
-
-```bash
-venv\Scripts\activate
-```
-
-Linux/Mac:
-
-```bash
-source venv/bin/activate
-```
-
-### 4. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 5. Configure MySQL Database
+### 2. Configure MySQL Database
 
 Create a database:
 
@@ -198,7 +173,7 @@ MYSQL_PASSWORD = 'your_password'
 MYSQL_DB = 'career_readiness_db'
 ```
 
-### 6. Configure API Keys
+### 3. Configure API Keys
 
 Add your API keys inside the project configuration:
 
@@ -206,7 +181,7 @@ Add your API keys inside the project configuration:
 * News API Key
 
 
-### 7. Run the Application
+### 4. Run the Application
 
 ```bash
 python app.py
