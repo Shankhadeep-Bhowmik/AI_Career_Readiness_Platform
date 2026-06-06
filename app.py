@@ -1,8 +1,7 @@
 # Main Python File
 import pymysql
-pymysql.install_as_MySQLdb()
+import pymysql.cursors
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
-from flask_mysqldb import MySQL
 import os
 from datetime import datetime
 import json
@@ -13,196 +12,219 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
 # Groq AI and api
-try:
-  with open("Api.txt", "r") as file:
-    groq_api_key = file.read().strip()
-except FileNotFoundError:
-  print("ERROR: Api.txt not found")
-  groq_api_key = ""
+groq_api_key = os.environ.get("GROQ_API_KEY", "")
+if not groq_api_key:
+    try:
+        with open("Api.txt", "r") as file:
+            groq_api_key = file.read().strip()
+    except FileNotFoundError:
+        print("ERROR: Api.txt not found")
+        groq_api_key = ""
 
 ai = Groq(api_key=groq_api_key)
 
+# News API Key
+news_api_key = os.environ.get("NEWS_API_KEY", "")
+if not news_api_key:
+    try:
+        with open("News_API.txt", "r") as file:
+            news_api_key = file.read().strip()
+    except FileNotFoundError:
+        print("ERROR: News_Api.txt not found")
+        news_api_key = ""
 
 # MySQL Configuration - Aiven Cloud Database
-app.config['MYSQL_HOST'] = os.environ.get('MYSQL_HOST', 'localhost')
-app.config['MYSQL_USER'] = os.environ.get('MYSQL_USER', 'root')
-app.config['MYSQL_PASSWORD'] = os.environ.get('MYSQL_PASSWORD', 'root@123')
-app.config['MYSQL_DB'] = os.environ.get('MYSQL_DB', 'career_readiness_db')
-app.config['MYSQL_PORT'] = int(os.environ.get('MYSQL_PORT', 3306))
-app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
-app.config['MYSQL_SSL'] = {'ssl': {'ca': os.environ.get('MYSQL_SSL_CA', '')}} if os.environ.get('MYSQL_SSL_CA') else {}
-mysql = MySQL(app)
+DB_CONFIG = {
+    'host': os.environ.get('MYSQL_HOST', 'localhost'),
+    'user': os.environ.get('MYSQL_USER', 'root'),
+    'password': os.environ.get('MYSQL_PASSWORD', 'root@123'),
+    'database': os.environ.get('MYSQL_DB', 'career_readiness_db'),
+    'port': int(os.environ.get('MYSQL_PORT', 3306)),
+    'cursorclass': pymysql.cursors.DictCursor,
+    'autocommit': True
+}
+
+def get_db():
+    return pymysql.connect(**DB_CONFIG)
+
 # Global login protection route wrapper
 def check_session():
-  return 'user_id' in session
+    return 'user_id' in session
 
 # Routes
 # Home / Landing page
 @app.route('/')
 def home():
-  return render_template('home.html')
+    return render_template('home.html')
 
 # Registration page
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-  if request.method == 'POST':
-    name = request.form.get('name', '').strip()
-    email = request.form.get('email', '').strip()
-    password = request.form.get('password', '').strip()
-    course = request.form.get('course', '').strip()
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '').strip()
+        course = request.form.get('course', '').strip()
 
-    if not name or not email or not password or not course:
-      flash('All fields are required. Please fill in the form completely.', 'danger')
-      return redirect(url_for('register'))
+        if not name or not email or not password or not course:
+            flash('All fields are required. Please fill in the form completely.', 'danger')
+            return redirect(url_for('register'))
 
-    try:
-      cursor = mysql.connection.cursor()
-      # Check if email already exists
-      cursor.execute('SELECT user_id FROM user WHERE email = %s', (email,))
-      existing = cursor.fetchone()
-      if existing:
-         cursor.close()
-         flash('User already exists with this email address.', 'warning')
-         return redirect(url_for('register'))
-      
-      #Insert text details into your live user table columns
-      cursor.execute(
-        'INSERT INTO user(name, email, password, course) VALUES (%s, %s, %s, %s)', (name, email, password, course)
-      )
-      mysql.connection.commit()
-      flash('Registration successful! Please log in.', 'success')
-      return redirect(url_for('login'))
-    except Exception as e:
-      flash(f'Error: Registration failed! {e}', 'danger')
-    finally:
-      cursor.close()
-  return render_template('register.html')
+        try:
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute('SELECT user_id FROM user WHERE email = %s', (email,))
+            existing = cursor.fetchone()
+            if existing:
+                cursor.close()
+                conn.close()
+                flash('User already exists with this email address.', 'warning')
+                return redirect(url_for('register'))
+
+            cursor.execute(
+                'INSERT INTO user(name, email, password, course) VALUES (%s, %s, %s, %s)',
+                (name, email, password, course)
+            )
+            cursor.close()
+            conn.close()
+            flash('Registration successful! Please log in.', 'success')
+            return redirect(url_for('login'))
+        except Exception as e:
+            flash(f'Error: Registration failed! {e}', 'danger')
+    return render_template('register.html')
 
 # Registration API for frontend (JSON)
 @app.route('/api/register', methods=['POST'])
 def api_register():
-  data = request.get_json(silent=True) or {}
-  name = data.get('name', '').strip()
-  email = data.get('email', '').strip()
-  password = data.get('password', '')
-  course = data.get('course', '').strip()
+    data = request.get_json(silent=True) or {}
+    name = data.get('name', '').strip()
+    email = data.get('email', '').strip()
+    password = data.get('password', '')
+    course = data.get('course', '').strip()
 
-  if not name or not email or not password or not course:
-    return jsonify({
-      'success': False,
-      'message': 'All fields are required. Please fill in the form completely.'
-    }), 400
+    if not name or not email or not password or not course:
+        return jsonify({
+            'success': False,
+            'message': 'All fields are required. Please fill in the form completely.'
+        }), 400
 
-  if len(password) < 8:
-    return jsonify({
-      'success': False,
-      'message': 'Password must be at least 8 characters long.'
-    }), 400
+    if len(password) < 8:
+        return jsonify({
+            'success': False,
+            'message': 'Password must be at least 8 characters long.'
+        }), 400
 
-  try:
-    cursor = mysql.connection.cursor()
-    cursor.execute('SELECT user_id FROM user WHERE email = %s', (email,))
-    existing = cursor.fetchone()
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute('SELECT user_id FROM user WHERE email = %s', (email,))
+        existing = cursor.fetchone()
 
-    if existing:
-      cursor.close()
-      return jsonify({
-        'success': False,
-        'message': 'This email is already registered. Please login instead.'
-      }), 409
+        if existing:
+            cursor.close()
+            conn.close()
+            return jsonify({
+                'success': False,
+                'message': 'This email is already registered. Please login instead.'
+            }), 409
 
-    cursor.execute(
-      'INSERT INTO user(name, email, password, course) VALUES (%s, %s, %s, %s)',
-      (name, email, password, course)
-    )
-    mysql.connection.commit()
-    cursor.close()
+        cursor.execute(
+            'INSERT INTO user(name, email, password, course) VALUES (%s, %s, %s, %s)',
+            (name, email, password, course)
+        )
+        cursor.close()
+        conn.close()
 
-    return jsonify({
-      'success': True,
-      'message': 'Registration successful! Please log in.',
-      'redirect': '/login?registered=success'
-    })
-  except Exception as e:
-    return jsonify({
-      'success': False,
-      'message': f'Registration failed. {str(e)}'
-    }), 500
+        return jsonify({
+            'success': True,
+            'message': 'Registration successful! Please log in.',
+            'redirect': '/login?registered=success'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Registration failed. {str(e)}'
+        }), 500
 
 # Login page
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-  if request.method == 'POST':
-    email = request.form['email']
-    password = request.form['password']
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
 
-    cursor = mysql.connection.cursor()
-    cursor.execute(
-      'SELECT * FROM user WHERE email = %s AND password = %s', (email, password)
-    )
-    user = cursor.fetchone()
-    cursor.close()
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT * FROM user WHERE email = %s AND password = %s', (email, password)
+        )
+        user = cursor.fetchone()
+        cursor.close()
+        conn.close()
 
-    if user:
-      session['user_id'] = user['user_id']
-      session['name'] = user['name']
-      session['email'] = user['email']
-      session['course'] = user['course']
-      flash(f"Welcome back, {user['name']}!","success")
-      return redirect(url_for('dashboard'))
-    else:
-      flash("Invalid Email or Password.","danger")
-  return render_template('login.html')
+        if user:
+            session['user_id'] = user['user_id']
+            session['name'] = user['name']
+            session['email'] = user['email']
+            session['course'] = user['course']
+            flash(f"Welcome back, {user['name']}!", "success")
+            return redirect(url_for('dashboard'))
+        else:
+            flash("Invalid Email or Password.", "danger")
+    return render_template('login.html')
 
 # Login API for frontend (JSON)
 @app.route('/api/login', methods=['POST'])
 def api_login():
-  data = request.get_json(silent=True) or {}
-  email = data.get('email', '').strip()
-  password = data.get('password', '').strip()
+    data = request.get_json(silent=True) or {}
+    email = data.get('email', '').strip()
+    password = data.get('password', '').strip()
 
-  if not email or not password:
+    if not email or not password:
+        return jsonify({
+            'success': False,
+            'message': 'Email and password are required.'
+        }), 400
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        'SELECT * FROM user WHERE email = %s AND password = %s', (email, password)
+    )
+    user = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if user:
+        session['user_id'] = user['user_id']
+        session['name'] = user['name']
+        session['email'] = user['email']
+        session['course'] = user['course']
+        return jsonify({
+            'success': True,
+            'message': f"Welcome back, {user['name']}!",
+            'redirect': '/dashboard'
+        })
+
     return jsonify({
-      'success': False,
-      'message': 'Email and password are required.'
-    }), 400
-
-  cursor = mysql.connection.cursor()
-  cursor.execute(
-    'SELECT * FROM user WHERE email = %s AND password = %s', (email, password)
-  )
-  user = cursor.fetchone()
-  cursor.close()
-
-  if user:
-    session['user_id'] = user['user_id']
-    session['name'] = user['name']
-    session['email'] = user['email']
-    session['course'] = user['course']
-    return jsonify({
-      'success': True,
-      'message': f"Welcome back, {user['name']}!",
-      'redirect': '/dashboard'
-    })
-
-  return jsonify({
-    'success': False,
-    'message': 'Invalid email or password. Please try again.'
-  }), 401
+        'success': False,
+        'message': 'Invalid email or password. Please try again.'
+    }), 401
 
 # Student Dashboard Page
 @app.route('/dashboard')
 def dashboard():
-  if not check_session():
-    return redirect(url_for('login'))
-  
-  # fetch history dynamically from progress table
-  cursor = mysql.connection.cursor()
-  cursor.execute('SELECT * FROM progress WHERE user_id = %s ORDER BY date DESC', (session['user_id'],))
-  progress_history = cursor.fetchall()
-  cursor.close()
+    if not check_session():
+        return redirect(url_for('login'))
 
-  return render_template('dashboard.html', name=session['name'], course=session['course'], progress=progress_history)
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM progress WHERE user_id = %s ORDER BY date DESC', (session['user_id'],))
+    progress_history = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return render_template('dashboard.html', name=session['name'], course=session['course'], progress=progress_history)
 
 # Dashboard API for frontend (JSON)
 @app.route('/api/dashboard')
@@ -211,37 +233,33 @@ def api_dashboard():
         return jsonify({'success': False, 'message': 'Not logged in'}), 401
 
     user_id = session['user_id']
-    cursor = mysql.connection.cursor()
+    conn = get_db()
+    cursor = conn.cursor()
 
-    # Fetch skills (uses your skill table with target_level)
     cursor.execute(
         'SELECT skill_name, current_level, target_level FROM skill WHERE user_id = %s',
         (user_id,)
     )
     skills_rows = cursor.fetchall()
 
-    # Fetch interview practice count (uses your interview table)
     cursor.execute(
         'SELECT COUNT(*) AS cnt FROM interview WHERE user_id = %s',
         (user_id,)
     )
     interview_row = cursor.fetchone()
 
-    # Fetch days active from user.created_at
     cursor.execute(
         'SELECT name, created_at FROM user WHERE user_id = %s',
         (user_id,)
     )
     user_row = cursor.fetchone()
 
-    # Fetch latest roadmap progress from progress table
     cursor.execute(
         'SELECT overall_score FROM progress WHERE user_id = %s ORDER BY date DESC LIMIT 1',
         (user_id,)
     )
     progress_row = cursor.fetchone()
 
-    # Fetch recent progress entries as activity (latest 4)
     cursor.execute(
         'SELECT date, skill_score, overall_score FROM progress WHERE user_id = %s ORDER BY date DESC LIMIT 4',
         (user_id,)
@@ -249,8 +267,8 @@ def api_dashboard():
     progress_history = cursor.fetchall()
 
     cursor.close()
+    conn.close()
 
-    # --- Build skills list ---
     skills = [
         {
             'name': row['skill_name'],
@@ -260,24 +278,18 @@ def api_dashboard():
         for row in skills_rows
     ] if skills_rows else []
 
-    # --- Career score: average current_level scaled to 100 ---
     career_score = 0
     if skills:
         avg = sum(s['current'] for s in skills) / len(skills)
-        career_score = round(avg * 10)  # 0–10 scale → 0–100
+        career_score = round(avg * 10)
 
-    # --- Days active ---
     days_active = 0
     if user_row and user_row.get('created_at'):
         days_active = (datetime.now() - user_row['created_at']).days
 
-    # --- Interviews practiced ---
     interviews_practiced = interview_row['cnt'] if interview_row else 0
-
-    # --- Roadmap progress: use overall_score from latest progress row ---
     roadmap_progress = progress_row['overall_score'] if progress_row else 0
 
-    # --- Recent activity: built from progress table since no activity_log ---
     def time_ago(dt):
         if isinstance(dt, str):
             dt = datetime.strptime(dt, '%Y-%m-%d')
@@ -297,13 +309,11 @@ def api_dashboard():
             'time': time_ago(row['date'])
         })
 
-    # Fallback if no activity yet
     if not recent_activity:
         recent_activity = [
             {'icon': 'fa-circle-info', 'text': 'No recent activity yet. Start exploring!', 'time': ''}
         ]
 
-    # --- Student initials ---
     name = session['name']
     initials = ''.join([part[0].upper() for part in name.split()[:2]])
 
@@ -327,38 +337,34 @@ def api_dashboard():
 
 @app.route('/api/skills', methods=['POST'])
 def api_skills():
-  if not check_session():
-    return jsonify({
-      'success':False,
-      'message':'Not logged in'
-    }), 401
-  
-  data = request.get_json(silent=True) or {}
-  technical = data.get('technical', {})
-  soft = data.get('soft', {})
-  all_skills = {**technical, **soft}
+    if not check_session():
+        return jsonify({'success': False, 'message': 'Not logged in'}), 401
 
-  if not all_skills:
-    return jsonify({'success': False, 'message': 'No skills provided'}), 400
-  
-  user_id = session['user_id']
-  cursor = mysql.connection.cursor()
+    data = request.get_json(silent=True) or {}
+    technical = data.get('technical', {})
+    soft = data.get('soft', {})
+    all_skills = {**technical, **soft}
 
-   # Save all skills to DB
-  for skill_name, level in all_skills.items():
-    cursor.execute('''
+    if not all_skills:
+        return jsonify({'success': False, 'message': 'No skills provided'}), 400
+
+    user_id = session['user_id']
+    conn = get_db()
+    cursor = conn.cursor()
+
+    for skill_name, level in all_skills.items():
+        cursor.execute('''
             INSERT INTO skill(user_id, skill_name, current_level)
             VALUES (%s, %s, %s)
             ON DUPLICATE KEY UPDATE current_level = %s
-    ''', (user_id, skill_name, int(level), int(level)))
+        ''', (user_id, skill_name, int(level), int(level)))
 
-  mysql.connection.commit()
-  cursor.close()
+    cursor.close()
+    conn.close()
 
-  #Build skill list for gemini prompt
-  skill_lines = '\n'.join([f'- {name}: {level}/10' for name, level in all_skills.items()])
+    skill_lines = '\n'.join([f'- {name}: {level}/10' for name, level in all_skills.items()])
 
-  prompt = f"""
+    prompt = f"""
 You are a career readiness AI. A student has rated their skills below.
 Analyze the skill gaps and return ONLY a valid JSON object. No explanation, no markdown, no extra text.
 
@@ -392,97 +398,102 @@ Rules:
 - Return ONLY the JSON, nothing else
 """
 
-  try:
-    response = ai.chat.completions.create(
-      model='llama-3.3-70b-versatile',
-      messages=[{'role': 'user', 'content': prompt}],
-      temperature=0.3
-    )
+    try:
+        response = ai.chat.completions.create(
+            model='llama-3.3-70b-versatile',
+            messages=[{'role': 'user', 'content': prompt}],
+            temperature=0.3
+        )
 
-    raw = response.choices[0].message.content.strip()
+        raw = response.choices[0].message.content.strip()
 
-    # Remove markdown code fences if Gemini adds them
-    if raw.startswith("```"):
-      raw = raw.split("```")[1]
-      if raw.startswith("json"):
-        raw = raw[4:]
-      raw = raw.strip()
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+            raw = raw.strip()
 
-    result = json.loads(raw)
-    result['success'] = True
-    return jsonify(result)
+        result = json.loads(raw)
+        result['success'] = True
+        return jsonify(result)
 
-  except json.JSONDecodeError:
-    return jsonify({'success': False, 'message': 'AI returned invalid response. Please try again.'}), 500
-  except Exception as e:
-    return jsonify({'success': False, 'message': f'AI analysis failed: {str(e)}'}), 500
-
+    except json.JSONDecodeError:
+        return jsonify({'success': False, 'message': 'AI returned invalid response. Please try again.'}), 500
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'AI analysis failed: {str(e)}'}), 500
 
 # Skill assessment
-@app.route('/skills', methods=['GET','POST'])
+@app.route('/skills', methods=['GET', 'POST'])
 def skills():
-  if not check_session():
-    return redirect(url_for('login'))
-  if request.method == 'POST':
-    skills_names = request.form.getlist('skill_name')
-    current_level = request.form.getlist('current_level')
-    cursor = mysql.connection.cursor()
+    if not check_session():
+        return redirect(url_for('login'))
+    if request.method == 'POST':
+        skills_names = request.form.getlist('skill_name')
+        current_levels = request.form.getlist('current_level')
+        conn = get_db()
+        cursor = conn.cursor()
 
-    for skill_name, current_level in zip(skills_names, current_level):
-      if skill_name.strip() == '' or current_level.strip() == '':
-        continue
-      if not current_level.isdigit():
-        flash('Please enter valid number','danger')
-        return redirect(url_for('skills'))
-      if not (1 <= int(current_level) <= 10):
-        flash('Skill level must be between 1 and 10','danger')
-        return redirect(url_for('skills'))
-      cursor.execute('''
-          INSERT INTO skill(user_id, skill_name, current_level) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE current_level = %s
-      ''', (session['user_id'], skill_name, int(current_level), int(current_level)))
-    
-    mysql.connection.commit()
-    cursor.close()
+        for skill_name, current_level in zip(skills_names, current_levels):
+            if skill_name.strip() == '' or current_level.strip() == '':
+                continue
+            if not current_level.isdigit():
+                flash('Please enter valid number', 'danger')
+                cursor.close()
+                conn.close()
+                return redirect(url_for('skills'))
+            if not (1 <= int(current_level) <= 10):
+                flash('Skill level must be between 1 and 10', 'danger')
+                cursor.close()
+                conn.close()
+                return redirect(url_for('skills'))
+            cursor.execute('''
+                INSERT INTO skill(user_id, skill_name, current_level) VALUES (%s, %s, %s)
+                ON DUPLICATE KEY UPDATE current_level = %s
+            ''', (session['user_id'], skill_name, int(current_level), int(current_level)))
 
-    flash('Skills updated! Ready to see your roadmap!','success')
-    return redirect(url_for('roadmap'))
-  return render_template('skill.html')
-
+        cursor.close()
+        conn.close()
+        flash('Skills updated! Ready to see your roadmap!', 'success')
+        return redirect(url_for('roadmap'))
+    return render_template('skill.html')
 
 @app.route('/roadmap')
 def roadmap():
-  if not check_session():
-    return redirect(url_for('login'))
-  return render_template('roadmap.html')
+    if not check_session():
+        return redirect(url_for('login'))
+    return render_template('roadmap.html')
 
 @app.route('/interview')
 def interview():
-  if not check_session():
-    return redirect(url_for('login'))
-  return render_template('interview.html')
+    if not check_session():
+        return redirect(url_for('login'))
+    return render_template('interview.html')
 
 @app.route('/api/interview/start', methods=['POST'])
 def api_interview_start():
-  if not check_session():
-    return jsonify({'success': False, 'message': 'Not logged in'}), 401
-  data = request.get_json(silent=True) or {}
-  interview_type = data.get('type', 'Technical Interview')
-  difficulty = data.get('difficulty', 'Beginner')
-  question_count = int(data.get('questionCount', 5))
-  user_id = session['user_id']
+    if not check_session():
+        return jsonify({'success': False, 'message': 'Not logged in'}), 401
 
-  cursor = mysql.connection.cursor()
-  cursor.execute('SELECT skill_name, current_level FROM skill WHERE user_id = %s', (user_id,))
-  skills = cursor.fetchall()
-  cursor.close()
+    data = request.get_json(silent=True) or {}
+    interview_type = data.get('type', 'Technical Interview')
+    difficulty = data.get('difficulty', 'Beginner')
+    question_count = int(data.get('questionCount', 5))
+    user_id = session['user_id']
 
-  skill_lines = '\n'.join([
-    f"{s['skill_name']}: {s['current_level']}/10"
-    for s in skills
-  ]) if skills else "General student with no specific skills assessed yet."
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT skill_name, current_level FROM skill WHERE user_id = %s', (user_id,))
+    skills = cursor.fetchall()
+    cursor.close()
+    conn.close()
 
-  prompt = f"""
-  You are a professional interviewer conducting a {interview_type} at {difficulty} level.
+    skill_lines = '\n'.join([
+        f"{s['skill_name']}: {s['current_level']}/10"
+        for s in skills
+    ]) if skills else "General student with no specific skills assessed yet."
+
+    prompt = f"""
+You are a professional interviewer conducting a {interview_type} at {difficulty} level.
 The student has these skills:
 {skill_lines}
 
@@ -507,24 +518,24 @@ Rules:
 - For Mixed Interview: mix of technical and HR questions
 - Return ONLY the JSON nothing else
 """
-  try:
-    response = ai.chat.completions.create(
-      model = 'llama-3.3-70b-versatile',
-      messages=[{'role': 'user', 'content': prompt}],
-      temperature=0.7
-    )
-    raw = response.choices[0].message.content.strip()
-    if raw.startswith("```"):
-      raw = raw.split("```")[1]
-      if raw.startswith("json"):
-        raw = raw[4:]
-      raw = raw.strip()
-    
-    result = json.loads(raw)
-    result['success'] = True
-    return jsonify(result)
-  except Exception as e:
-    return jsonify({'success':False, 'message':str(e)}), 500
+    try:
+        response = ai.chat.completions.create(
+            model='llama-3.3-70b-versatile',
+            messages=[{'role': 'user', 'content': prompt}],
+            temperature=0.7
+        )
+        raw = response.choices[0].message.content.strip()
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+            raw = raw.strip()
+
+        result = json.loads(raw)
+        result['success'] = True
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/api/interview/answer', methods=['POST'])
 def api_interview_answer():
@@ -587,9 +598,9 @@ Scoring:
 
         result = json.loads(raw)
 
-        # Save to database
         user_id = session['user_id']
-        cursor = mysql.connection.cursor()
+        conn = get_db()
+        cursor = conn.cursor()
         cursor.execute('''
             INSERT INTO interview(user_id, question, answer, feedback, score)
             VALUES (%s, %s, %s, %s, %s)
@@ -603,8 +614,8 @@ Scoring:
             }),
             result.get('score', 5)
         ))
-        mysql.connection.commit()
         cursor.close()
+        conn.close()
 
         result['success'] = True
         return jsonify(result)
@@ -612,55 +623,81 @@ Scoring:
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
+@app.route('/api/interview/stats')
+def api_interview_stats():
+    if not check_session():
+        return jsonify({'success': False}), 401
+
+    user_id = session['user_id']
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        'SELECT score FROM interview WHERE user_id = %s AND score IS NOT NULL',
+        (user_id,)
+    )
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    if not rows:
+        return jsonify({'success': True, 'total': 0, 'average': 0, 'best': 0})
+
+    scores = [r['score'] for r in rows]
+    total = len(scores)
+    average = round(sum(scores) / total)
+    best = max(scores)
+
+    return jsonify({
+        'success': True,
+        'total': total,
+        'average': average,
+        'best': best
+    })
+
 @app.route('/resume')
 def resume():
-  if not check_session():
-      return redirect(url_for('login'))
-  return render_template('resume.html')
+    if not check_session():
+        return redirect(url_for('login'))
+    return render_template('resume.html')
 
 @app.route('/news')
 def news():
-  if not check_session():
-    return redirect(url_for('login'))
-  return render_template('news.html')
+    if not check_session():
+        return redirect(url_for('login'))
+    return render_template('news.html')
 
 @app.route('/logout')
 def logout():
-  session.clear()
-  return redirect(url_for('home'))
+    session.clear()
+    return redirect(url_for('home'))
 
 @app.route('/api/roadmap')
 def api_roadmap():
-  if not check_session():
-    return jsonify({
-      'success':False,
-      'message':'Not logged in'
-    }), 401
-  
-  user_id = session['user_id']
-  cursor = mysql.connection.cursor()
+    if not check_session():
+        return jsonify({'success': False, 'message': 'Not logged in'}), 401
 
-  cursor.execute(
-    'SELECT skill_name, current_level FROM skill WHERE user_id = %s', (user_id,)
-  )
-  skills = cursor.fetchall()
-  cursor.close()
+    user_id = session['user_id']
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        'SELECT skill_name, current_level FROM skill WHERE user_id = %s', (user_id,)
+    )
+    skills = cursor.fetchall()
+    cursor.close()
+    conn.close()
 
-  if not skills:
-    return jsonify({
-      'success':False,
-      'message':'No skills found'
-    }), 404
-  
-  skill_lines = '\n'.join([
+    if not skills:
+        return jsonify({'success': False, 'message': 'No skills found'}), 404
+
+    skill_lines = '\n'.join([
         f"- {s['skill_name']}: {s['current_level']}/10"
         for s in skills
-  ])
+    ])
 
-  prompt = f"""
-  You are a career roadmap AI for 2026-2027.
-  A student has these skills:
-  {skill_lines}
+    prompt = f"""
+You are a career roadmap AI for 2026-2027.
+A student has these skills:
+{skill_lines}
 
 Your job:
 1. Understand what career path this student is heading towards
@@ -671,18 +708,6 @@ Your job:
 
 Return ONLY valid JSON, no explanation, no markdown:
 {{
-  "careerPath": "<detected career path>",
-  "steps": [
-    {{
-      "id": 1,
-      "topic": "<topic name>",
-      "icon": "<font awesome class like fa-solid fa-code>",
-      "description": "<2 sentence description of what to learn and why>",
-      "estimatedTime": "<realistic time like 2 weeks>",
-      "difficulty": "<Beginner or Intermediate or Advanced>",
-      "status": "current",
-      "whyImportant": "<one line why this skill matters in 2026-2027 industry>",
-      {{
   "careerPath": "<detected career path like Full Stack Developer>",
   "summary": "<2 sentence overview of this roadmap>",
   "phases": [
@@ -703,9 +728,6 @@ Return ONLY valid JSON, no explanation, no markdown:
       ]
     }}
   ]
- }}
-    }}
-  ]
 }}
 
 Rules:
@@ -718,63 +740,33 @@ Rules:
 - This is a ROADMAP not a course provider
 - Return ONLY the JSON nothing else
 """
-  try:
-    response = ai.chat.completions.create(
-        model='llama-3.3-70b-versatile',
-      messages=[{'role': 'user', 'content': prompt}],
-      temperature=0.4
-    )
+    try:
+        response = ai.chat.completions.create(
+            model='llama-3.3-70b-versatile',
+            messages=[{'role': 'user', 'content': prompt}],
+            temperature=0.4
+        )
 
-    raw = response.choices[0].message.content.strip()
+        raw = response.choices[0].message.content.strip()
 
-        # Remove markdown if AI adds it
-    if raw.startswith("```"):
-      raw = raw.split("```")[1]
-      if raw.startswith("json"):
-        raw = raw[4:]
-        raw = raw.strip()
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+            raw = raw.strip()
 
-    result = json.loads(raw)
-    result['success'] = True
-    return jsonify(result)
+        result = json.loads(raw)
+        result['success'] = True
+        return jsonify(result)
 
-  except json.JSONDecodeError:
-    return jsonify({'success': False, 'message': 'AI returned invalid response'}), 500
-  except Exception as e:
-    return jsonify({'success': False, 'message': f'AI failed: {str(e)}'}), 500
-
-@app.route('/api/interview/stats')
-def api_interview_stats():
-    if not check_session():
-        return jsonify({'success': False}), 401
-
-    user_id = session['user_id']
-    cursor = mysql.connection.cursor()
-    cursor.execute(
-        'SELECT score FROM interview WHERE user_id = %s AND score IS NOT NULL',
-        (user_id,)
-    )
-    rows = cursor.fetchall()
-    cursor.close()
-
-    if not rows:
-        return jsonify({'success': True, 'total': 0, 'average': 0, 'best': 0})
-
-    scores = [r['score'] for r in rows]
-    total = len(scores)
-    average = round(sum(scores) / total)
-    best = max(scores)
-
-    return jsonify({
-        'success': True,
-        'total': total,
-        'average': average,
-        'best': best
-    })
+    except json.JSONDecodeError:
+        return jsonify({'success': False, 'message': 'AI returned invalid response'}), 500
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'AI failed: {str(e)}'}), 500
 
 @app.route('/api/roadmap/regenrate', methods=['POST'])
 def api_roadmap_regenrate():
-  return api_roadmap()  # For simplicity, just call the same function to regenerate
+    return api_roadmap()
 
 @app.route('/api/resume/feedback', methods=['POST'])
 def api_resume_feedback():
@@ -790,7 +782,6 @@ def api_resume_feedback():
     projects = data.get('projects', [])
     certifications = data.get('certifications', [])
 
-    # Build resume summary for AI
     resume_summary = f"""
 Name: {personal.get('fullName', 'Not provided')}
 Email: {personal.get('email', 'Not provided')}
@@ -870,21 +861,11 @@ Scoring guide:
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
-
-# Load News API Key
-try:
-    with open("News_API.txt", "r") as file:
-        news_api_key = file.read().strip()
-except FileNotFoundError:
-    print("ERROR: News_Api.txt not found")
-    news_api_key = ""
-
 @app.route('/api/news')
 def api_news():
     if not check_session():
         return jsonify({'success': False, 'message': 'Not logged in'}), 401
 
-    # Get query parameters sent by news.js
     page = request.args.get('page', default=1, type=int)
     page_size = request.args.get('pageSize', default=9, type=int)
     category = request.args.get('category', default='all')
@@ -893,7 +874,6 @@ def api_news():
     if not news_api_key:
         return jsonify({'success': False, 'message': 'News API key is missing on the server.'}), 500
 
-    # Map your frontend dashboard categories to target keywords for NewsAPI
     category_keywords = {
         'ai': 'artificial intelligence OR machine learning OR deep learning',
         'web': 'web development OR javascript OR reactjs OR nodejs',
@@ -902,16 +882,13 @@ def api_news():
         'cloud': 'cloud computing OR aws OR azure OR devops'
     }
 
-    # Construct search query
     if search_keyword:
         query = search_keyword
     elif category in category_keywords:
         query = category_keywords[category]
     else:
-        # Default fallback catch-all tech query for "all" category
         query = 'technology OR tech software OR computer science'
 
-    # Build the live NewsAPI endpoint URL (focusing on developer/tech headlines)
     news_url = f"https://newsapi.org/v2/everything?q={query}&language=en&sortBy=publishedAt&pageSize={page_size}&page={page}&apiKey={news_api_key}"
 
     try:
@@ -921,8 +898,6 @@ def api_news():
         if news_data.get('status') == 'ok':
             articles = news_data.get('articles', [])
             total_results = news_data.get('totalResults', 0)
-            
-            # Check if there are more articles available for pagination
             has_more = (page * page_size) < total_results
 
             return jsonify({
@@ -935,8 +910,7 @@ def api_news():
 
     except Exception as e:
         return jsonify({'success': False, 'message': f"Internet connectivity error: {str(e)}"}), 500
-    
 
 
 if __name__ == '__main__':
-  app.run(debug=True)
+    app.run(debug=True)
