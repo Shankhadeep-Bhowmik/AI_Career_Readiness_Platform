@@ -190,7 +190,7 @@ python app.py
 Open browser:
 
 ```text
-http://127.0.0.1:5000
+https://ai-career-readiness-platform-1.onrender.com
 ```
 
 ---
