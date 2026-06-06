@@ -35,11 +35,11 @@ if not news_api_key:
 
 # MySQL Configuration - Aiven Cloud Database
 DB_CONFIG = {
-    'host': os.environ.get('MYSQL_HOST', 'localhost'),
-    'user': os.environ.get('MYSQL_USER', 'root'),
-    'password': os.environ.get('MYSQL_PASSWORD', 'root@123'),
-    'database': os.environ.get('MYSQL_DB', 'career_readiness_db'),
-    'port': int(os.environ.get('MYSQL_PORT', 3306)),
+    'host': os.environ.get('DB_HOST', 'localhost'),
+    'user': os.environ.get('DB_USER', 'root'),
+    'password': os.environ.get('DB_PASSWORD', 'root@123'),
+    'database': os.environ.get('DB_NAME', 'career_readiness_db'),
+    'port': int(os.environ.get('DB_PORT', 3306)),
     'cursorclass': pymysql.cursors.DictCursor,
     'autocommit': True
 }
