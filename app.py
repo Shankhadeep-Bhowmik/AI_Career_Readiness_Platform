@@ -23,14 +23,15 @@ except FileNotFoundError:
 ai = Groq(api_key=groq_api_key)
 
 
-# MySQL Configuration
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'root@123'
-app.config['MYSQL_DB'] = 'career_readiness_db'
+# MySQL Configuration - Aiven Cloud Database
+app.config['MYSQL_HOST'] = os.environ.get('MYSQL_HOST', 'localhost')
+app.config['MYSQL_USER'] = os.environ.get('MYSQL_USER', 'root')
+app.config['MYSQL_PASSWORD'] = os.environ.get('MYSQL_PASSWORD', 'root@123')
+app.config['MYSQL_DB'] = os.environ.get('MYSQL_DB', 'career_readiness_db')
+app.config['MYSQL_PORT'] = int(os.environ.get('MYSQL_PORT', 3306))
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+app.config['MYSQL_SSL'] = {'ssl': {'ca': os.environ.get('MYSQL_SSL_CA', '')}} if os.environ.get('MYSQL_SSL_CA') else {}
 mysql = MySQL(app)
-
 # Global login protection route wrapper
 def check_session():
   return 'user_id' in session
