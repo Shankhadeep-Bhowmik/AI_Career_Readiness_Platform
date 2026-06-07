@@ -133,10 +133,22 @@ function initStartInterview() {
 }
 
 function setupMockQuestions() {
-  const bank = mockQuestionBank[interviewState.type] || mockQuestionBank["Technical Interview"];
-  const shuffled = bank.slice().sort(function () {
-    return 0.5 - Math.random();
-  });
+  // const bank = mockQuestionBank[interviewState.type] || mockQuestionBank["Technical Interview"];
+  // const shuffled = bank.slice().sort(function () {
+  //   return 0.5 - Math.random();
+  // });
+  const fallback = [
+    "Tell me about yourself and your background.",
+    "What are your strongest technical skills?",
+    "Describe a challenging project you worked on.",
+    "Where do you see yourself in 5 years?",
+    "Why do you want to work in this field?",
+    "How do you handle pressure and deadlines?",
+    "What is your biggest achievement so far?",
+    "How do you stay updated with new technologies?",
+    "Describe your problem solving approach.",
+    "What makes you a good candidate for this role?"
+  ];
   interviewState.questions = shuffled.slice(0, interviewState.totalQuestions);
   interviewState.sessionId = "mock-" + Date.now();
 }
@@ -477,7 +489,7 @@ function showSummary() {
 
   document.getElementById("overallScore").textContent = overallScore;
 
-  saveStats(overallScore);
+  saveStats();
 
   const strengths = [];
   const improvements = [];
